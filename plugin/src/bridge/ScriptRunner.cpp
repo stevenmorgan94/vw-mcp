@@ -61,6 +61,7 @@ namespace VwMcp
     const std::string& DataFolder()       { return gDataFolder; }
     const std::string& VectorworksBuild() { return gVwBuild; }
     const std::string& TableBuild()       { return gTableBuild; }
+    const char*        SafetyTableJson()  { return kVsSafetyTable; }
     int                TableFunctions()   { return gTableFunctions; }
 
     void IsdkClass(const std::string& fn, std::string& cls, std::string& via)

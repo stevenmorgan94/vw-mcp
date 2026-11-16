@@ -1,48 +1,84 @@
 # vw-mcp
 
-MCP server for Vectorworks: lets AI assistants script Vectorworks safely.
+MCP server for Vectorworks. It lets AI assistants (Claude, Cursor, VS Code and others) run Python inside Vectorworks, with every call safety-checked: calls that crash, hang or open dialogs are refused before they run, handle arguments are checked for the right kind of object, and each job is one undo step.
 
-> **Status: work in progress.** This repo is a scaffold. The safety layer, sweep harness and relay are here; the
-> headless plug-in builds but does nothing yet beyond logging at launch. Not usable end to end. First target:
-> macOS, Vectorworks 2027.
+> **Beta.** macOS, Vectorworks 2027. Test on copies of your drawings.
 
-## Architecture
+## Quick start
 
-1. **Plug-in** (`plugin/`): a headless `vw-mcp.vwlibrary`. An `IObjUpdateSupport` provider starts at Vectorworks launch.
-2. **Bridge** (in the plug-in, [#6](https://github.com/stevenmorgan94/vw-mcp/issues/6)): a local HTTP server on `127.0.0.1` queues jobs and runs them on the main thread.
-3. **Relay** (`relay/`): a Node MCP server (`npx -y vw-mcp`) that MCP clients talk to; it forwards jobs to the plug-in.
-4. **Safety** (`safety/`): every `vs.*` call is checked in the engine against a class table built by testing each function.
-5. **Sweep** (`sweep/`): the harness that builds that table by running every function against a throwaway document.
+1. **Download** `vw-mcp-<version>-vw2027-mac.zip` from the [latest release](https://github.com/stevenmorgan94/vw-mcp/releases/latest) and unzip it.
+2. **Install the plug-in:** move `vw-mcp.vwlibrary` into
+   `~/Library/Application Support/Vectorworks/2027/Plug-ins/`
+   (in Finder: Go › Go to Folder…, paste the path).
+3. **Start Vectorworks.** A report lists vw-mcp as a new plug-in: click **Enable**, then restart Vectorworks when asked.
+4. **Connect your AI app** (see below).
+5. **Check:** in Vectorworks, **Help › vw-mcp Status…** opens the status palette. Its light turns green once your AI app has connected. The **Connect AI** tab has the same setup snippets as below, with copy buttons.
 
-## Layout
+### Connect your AI app
 
-| Path | What |
+| App | Setup |
 |---|---|
-| `plugin/` | Xcode project (`VW_YEAR`, default 2027), sources in `src/{bridge,nativeops,safety}` |
-| `relay/` | The MCP server (Node) |
-| `safety/` | `vwguard.py` (in-engine guard), `build_table.py`, `vs-safety-table.json`, `functions.csv` |
-| `sweep/` | The sweep harness and derive step |
-| `docs/` | [Hardening spec](docs/MCP_HARDENING_SPEC.md), [glossary](docs/GLOSSARY.md), [sweep results](docs/sweep/README.md) |
-| `tools/` | Build and deploy scripts, ISDK dispatch generator (stub) |
+| **Claude Desktop** | Download `vw-mcp.mcpb` from the [latest release](https://github.com/stevenmorgan94/vw-mcp/releases/latest) and double-click it. |
+| **Claude Code** | `claude mcp add vw-mcp -- npx -y vw-mcp` |
+| **Cursor, VS Code, others** | Add an MCP server: `{ "mcpServers": { "vw-mcp": { "command": "npx", "args": ["-y", "vw-mcp"] } } }` (needs [Node.js](https://nodejs.org) 20+) |
 
-## Building the plug-in (macOS)
+Then give your AI the house rules (also on the palette's Connect AI tab):
+
+```text
+You can control Vectorworks through the vw-mcp tools.
+- Call vw_bridge_status first. If documentOpen is false, ask me to open a drawing.
+- Run Python with execute_script (the vs module is available). print() JSON to return data.
+- Every vs.* call is safety-checked. A refusal comes back as an error with a reason and advice. Don't retry a refused call; use the alternative it names.
+- Use vw_lookup_function before calling an unfamiliar vs.* function.
+- Only set allowUnclassified or allowDocumentLevel if I ask you to.
+- Each job is one undo step in Vectorworks.
+```
+
+## Tools
+
+| Tool | What it does |
+|---|---|
+| `vw_bridge_status` | Connection, Vectorworks build, document open, dialog blocking, safety table, last refusal. |
+| `execute_script` | Runs Python in the open document. Options: `timeoutSec` (default 30, max 300), `allowUnclassified`, `allowDocumentLevel`. |
+| `run_native_op` | Changes the document through native SDK calls (rect, line, text, layer, viewport, move, … and a generic `call`). |
+| `vw_lookup_function` | A `vs.*` function's safety class, argument checks, signature and alternative. |
+
+A refused call returns an error with `{refused, function, class, reason, alternative, partialChanges, advice}`. If earlier calls in the same job already changed the drawing, **Edit › Undo** reverts the whole job.
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| "Vectorworks with the vw-mcp plug-in is not running" | Start Vectorworks. If it's running, check the plug-in is in the Plug-ins folder and enabled (*Tools › Plug-ins › Plug-in Manager › Third-party Plug-ins*), then restart Vectorworks. |
+| No **Help › vw-mcp Status…** item | The plug-in isn't loaded: same fix as above. |
+| Status says "Bridge not running" | Ports 47823–47830 are all in use. Quit whatever uses them and restart Vectorworks. |
+| "Vectorworks is busy (a dialog is open)" | Close the open dialog in Vectorworks, then retry. |
+| "No document is open" | Open or create a drawing. |
+| A version warning in `vw_bridge_status` | The plug-in and the relay come from different releases. Install both from the same release. |
+| macOS says the plug-in can't be opened | Remove the download flag: `xattr -dr com.apple.quarantine ~/Library/Application\ Support/Vectorworks/2027/Plug-ins/vw-mcp.vwlibrary`, then restart Vectorworks. |
+
+## How it works
+
+1. **Plug-in** (`plugin/`): a headless `vw-mcp.vwlibrary`. It starts with Vectorworks, serves a local HTTP endpoint on `127.0.0.1` (token-protected, browsers refused), and runs each job on the main thread. **Help › vw-mcp Status…** shows its state.
+2. **Relay** (`relay/`, `npx -y vw-mcp`): the MCP server your AI app launches. It finds the plug-in through a discovery file and forwards jobs.
+3. **Safety** (`safety/`): every `vs.*` call is checked in the engine against a table built by running each of ~2,800 functions against a throwaway document ([results](docs/sweep/README.md), [spec](docs/MCP_HARDENING_SPEC.md)).
+4. **Sweep** (`sweep/`): the harness that builds that table.
+
+## Building from source (macOS)
 
 Needs Xcode and the Vectorworks SDK for the target year (from Vectorworks' developer program; not included).
 
 ```sh
 VW_SDK_DIR=/path/to/VectorworksSDK/SDK2027 tools/build-plugin.sh 2027 Debug   # -> build/2027/Debug/vw-mcp.vwlibrary
 tools/deploy-plugin.sh 2027 Debug                                            # copies it into the VW 2027 Plug-ins folder
+cd relay && npm ci && node server.mjs                                         # the relay over stdio
 ```
 
-`VW_SDK_DIR` defaults to `../VectorworksSDK/SDK<year>` next to this checkout. For builds from the Xcode app, copy
-`plugin/Config/Local.xcconfig.example` to `plugin/Config/Local.xcconfig` and set it there.
-
-Rebuild the safety table and its generated C++ include after a sweep: `python3 safety/build_table.py`.
+`VW_SDK_DIR` defaults to `../VectorworksSDK/SDK<year>` next to this checkout. For builds from the Xcode app, copy `plugin/Config/Local.xcconfig.example` to `plugin/Config/Local.xcconfig` and set it there. After a sweep, rebuild the safety table with `python3 safety/build_table.py`; after editing `plugin/palette/index.html`, run `python3 tools/embed_palette.py`.
 
 ## Trademark
 
-Vectorworks is a trademark of Vectorworks, Inc. This project is not affiliated with, endorsed by or sponsored by
-Vectorworks, Inc.
+Vectorworks is a trademark of Vectorworks, Inc. This project is not affiliated with, endorsed by or sponsored by Vectorworks, Inc.
 
 ## Licence
 

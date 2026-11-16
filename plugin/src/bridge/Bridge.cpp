@@ -17,6 +17,8 @@
 #define CPPHTTPLIB_THREAD_POOL_COUNT 4
 #include "../../third_party/cpp-httplib/httplib.h"
 
+#include "safety/VsSignatures.generated.inc"   // kVsSignatures
+
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
@@ -42,7 +44,7 @@ namespace Bridge
 {
     using Clock = std::chrono::steady_clock;
 
-    static const char*  kPluginVersion   = "0.1.0";
+    static const char*  kPluginVersion   = "0.1.0";   // keep in step with relay/package.json (tools/release.sh sets both)
     static const int    kPortFirst       = 47823;
     static const int    kPortLast        = 47830;
     static const double kBusyTimeoutSec  = 10.0;   // a job blocked this long by a dialog is refused (spec §3)
@@ -360,6 +362,13 @@ namespace Bridge
         });
         svr.Get("/status", [](const httplib::Request&, httplib::Response& res) { SendJson(res, StatusJson()); });
         svr.Post("/jobs", HandleSubmit);
+        // The data the relay's vw_lookup_function reads, so it always matches what this plug-in enforces (#17).
+        svr.Get("/safety-table", [](const httplib::Request&, httplib::Response& res) {
+            res.set_content(SafetyTableJson(), "application/json");
+        });
+        svr.Get("/signatures", [](const httplib::Request&, httplib::Response& res) {
+            res.set_content(kVsSignatures, "application/json");
+        });
         svr.Get(R"(/jobs/(\d+))", HandlePoll);
 
         for (int p = kPortFirst; p <= kPortLast; ++p)

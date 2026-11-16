@@ -23,6 +23,7 @@ namespace VwMcp
     const std::string& TableBuild();         // the build the safety table was swept on
     int                TableFunctions();     // entries in the safety table
     bool               SweepMode();
+    const char*        SafetyTableJson();    // the embedded safety table (GET /safety-table)
     // run_native_op `call` (#11): the class an ISDK method inherits from its vs.* twin, or "unclassified".
     void               IsdkClass(const std::string& fn, std::string& cls, std::string& via);          // the SWEEP_MODE marker exists (filesystem only: any thread)
 

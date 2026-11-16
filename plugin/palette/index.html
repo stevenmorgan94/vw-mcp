@@ -54,6 +54,7 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .log code { font-family: var(--mono) }
 .pill { display: inline-block; font-size: 10.5px; padding: 0 6px; border-radius: 999px; border: 1px solid currentColor; margin-left: 4px }
 .empty { color: var(--muted); padding: 12px 0 }
+.beta { font-size: 11px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 8px; margin-top: 2px }
 </style>
 </head>
 <body>
@@ -68,8 +69,8 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 'use strict';
 const CLIENTS = {
   code: { name: 'Claude Code', how: 'Run this once in a terminal:', code: 'claude mcp add vw-mcp -- npx -y vw-mcp' },
-  desktop: { name: 'Claude Desktop', how: 'Add this to claude_desktop_config.json (Settings › Developer › Edit Config), then restart Claude Desktop. Needs Node.js 20+.',
-    code: '{\n  "mcpServers": {\n    "vw-mcp": { "command": "npx", "args": ["-y", "vw-mcp"] }\n  }\n}' },
+  desktop: { name: 'Claude Desktop', how: 'Download vw-mcp.mcpb from the release page (address below) and double-click it. Claude Desktop installs it; no Node.js needed.',
+    code: 'https://github.com/stevenmorgan94/vw-mcp/releases/latest' },
   other: { name: 'Cursor / VS Code / other', how: 'Add this to your client’s MCP settings. Needs Node.js 20+.',
     code: '{\n  "mcpServers": {\n    "vw-mcp": { "command": "npx", "args": ["-y", "vw-mcp"] }\n  }\n}' },
 };
@@ -123,6 +124,7 @@ function render() {
       <dt>Vectorworks</dt><dd class="${st.tableBuild && st.vwBuild !== st.tableBuild ? 't-warn' : ''}">${esc(st.vwBuild || 'unknown')}</dd>
       <dt>Safety table</dt><dd>${esc(st.tableBuild || '?')} · ${(st.tableFunctions || 0).toLocaleString()} functions</dd>
       <dt>Plug-in</dt><dd>vw-mcp ${esc(st.pluginVersion)} · guard ${esc(st.guardVersion)}</dd></dl>`;
+    h += `<p class="beta">Beta: test on copies of your drawings. Every AI job is one undo step (Edit › Undo).</p>`;
   } else if (tab === 'connect') {
     const k = CLIENTS[client];
     h += `<label class="label" for="client">Your AI app</label>

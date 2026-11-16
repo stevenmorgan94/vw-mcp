@@ -8,6 +8,7 @@
 //    GET  /status            bridge state, connected AI clients, last 50 jobs
 //    POST /jobs              { code, lang?, allowDocumentLevel?, allowUnclassified?, timeoutSec? } -> { jobId }
 //    GET  /jobs/{id}?wait=N  long-poll (N <= 25 s) -> { pending:true } or the job result (one-shot)
+//    GET  /safety-table      the embedded safety table;  GET /signatures  vs.* signatures
 //  Every request needs "Authorization: Bearer <token>"; requests with an Origin header are refused.
 //  The port and token are in the discovery file <Application Support>/vw-mcp/instances/<pid>.json.
 //
