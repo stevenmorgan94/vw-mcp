@@ -6,11 +6,15 @@ MCP server for Vectorworks. It lets AI assistants (Claude, Cursor, VS Code and o
 
 ## Quick start
 
-1. **Download** `vw-mcp-<version>-vw2027-mac.zip` from the [latest release](https://github.com/stevenmorgan94/vw-mcp/releases/latest) and unzip it.
-2. **Install the plug-in:** move `vw-mcp.vwlibrary` into
+1. **Download** `vw-mcp-<version>-vw2027-mac.zip` from the [latest release](https://github.com/stevenmorgan94/vw-mcp/releases/latest) and unzip it (double-click). You get `vw-mcp.vwlibrary` in Downloads.
+2. **Clear the download flag** (the plug-in isn't notarized, so macOS won't let Vectorworks load it otherwise). Open Terminal and paste:
+   ```sh
+   xattr -dr com.apple.quarantine ~/Downloads/vw-mcp.vwlibrary
+   ```
+   Skip this and Vectorworks lists vw-mcp as incompatible ("Compiled for Version: Unknown") and won't load it.
+3. **Install the plug-in:** move `vw-mcp.vwlibrary` into
    `~/Library/Application Support/Vectorworks/2027/Plug-ins/`
-   (in Finder: Go › Go to Folder…, paste the path).
-3. **Start Vectorworks.** A report lists vw-mcp as a new plug-in: click **Enable**, then restart Vectorworks when asked.
+   (in Finder: Go › Go to Folder…, paste the path). Then start Vectorworks, open **Tools › Plug-ins › Plug-in Manager… › Third-party Plug-ins**, turn on **vw-mcp**, and restart Vectorworks.
 4. **Connect your AI app** (see below).
 5. **Check:** in Vectorworks, **Help › vw-mcp Status…** opens the status palette. Its light turns green once your AI app has connected. The **Connect AI** tab has the same setup snippets as below, with copy buttons.
 
@@ -55,7 +59,7 @@ A refused call returns an error with `{refused, function, class, reason, alterna
 | "Vectorworks is busy (a dialog is open)" | Close the open dialog in Vectorworks, then retry. |
 | "No document is open" | Open or create a drawing. |
 | A version warning in `vw_bridge_status` | The plug-in and the relay come from different releases. Install both from the same release. |
-| macOS says the plug-in can't be opened | Remove the download flag: `xattr -dr com.apple.quarantine ~/Library/Application\ Support/Vectorworks/2027/Plug-ins/vw-mcp.vwlibrary`, then restart Vectorworks. |
+| vw-mcp is in the *Incompatible Plug-ins Report* with version "Unknown", or the plug-in file disappears | The download flag wasn't cleared (step 2). Download the zip again, run the `xattr` line on the unzipped plug-in, reinstall, and restart Vectorworks. |
 
 ## How it works
 
