@@ -18,6 +18,7 @@ CLASS_TABLE = next(p for p in (ROOT / 'docs/sweep/class-table-v2.json', ROOT / '
 FUNCTIONS = HERE / 'functions.csv'
 OUT_JSON = HERE / 'vs-safety-table.json'
 OUT_INC = ROOT / 'plugin/src/safety/VsSafety.generated.inc'
+ISDK_DISPATCH = ROOT / 'plugin/src/nativeops/IsdkDispatch.inc'
 GUARD = HERE / 'vwguard.py'
 
 # Node types (SDK MiniCadHookIntf.h). Each rule = allowed GetTypeN values, plus a plug-in object name for type 86.
@@ -107,6 +108,27 @@ def arg_spec(f, name):
     return spec
 
 
+RANK = ['crasher', 'hang', 'interactive', 'event-only', 'document-level', 'safe']
+
+
+def isdk_classes(out, fns):
+    """run_native_op's `call` op (#11): each ISDK method in the dispatch takes the class of its vs.* twin
+    (functions.csv native_dispatch; the worst class when several vs functions share one method).
+    Methods with no classified twin are left out, so the plug-in treats them as unclassified."""
+    names = set(re.findall(r'^\s*\{\s*"(\w+)",\s*\[\]', ISDK_DISPATCH.read_text(), re.M))
+    twins = {}
+    for f in fns.values():
+        if f.get('native_dispatch') and f['name'] in out:
+            twins.setdefault(f['native_dispatch'], []).append(f['name'])
+    res = {}
+    for n in sorted(names):
+        vs = twins.get(n)
+        if not vs: continue
+        worst = min(vs, key=lambda v: RANK.index(out[v]['class']))
+        res[n] = {'class': out[worst]['class'], 'via': worst}
+    return res, len(names)
+
+
 def main():
     ct = json.loads(CLASS_TABLE.read_text())
     fns = {r['name']: r for r in csv.DictReader(FUNCTIONS.open())}
@@ -129,12 +151,14 @@ def main():
         if name in out or f['in_vs_py'] != '1' or f['kind'] == 'CONSTANT': continue
         c = category_class(f)
         if c: out[name] = {'class': c, 'basis': 'category'}
+    isdk, isdk_total = isdk_classes(out, fns)
     table = {
         'schema': 1,
         'vwBuild': ct.get('vwBuild'),
         'engine': ct.get('engine'),
         'source': ct.get('harness'),
         'pairs': PAIRS,
+        'isdk': isdk,
         'functions': out,
     }
     OUT_JSON.write_text(json.dumps(table, indent=0, sort_keys=True) + '\n')
@@ -150,6 +174,8 @@ def main():
         f'static const char* kVsGuardSource = R"{delim}({guard}){delim}";\n')
     from collections import Counter
     c = Counter(e['class'] for e in out.values())
+    ic = Counter(e['class'] for e in isdk.values())
+    print(f'isdk call: {len(isdk)} of {isdk_total} dispatch methods classified via a vs twin {dict(ic)}')
     print(f'{len(out)} functions {dict(c)}; with arg specs {sum("args" in e for e in out.values())}; '
           f'{len(compact) // 1024} KB -> {OUT_JSON.relative_to(ROOT)}, {OUT_INC.relative_to(ROOT)}')
 

@@ -22,7 +22,9 @@ namespace VwMcp
     const std::string& VectorworksBuild();   // e.g. "32.0.0 (882075)"
     const std::string& TableBuild();         // the build the safety table was swept on
     int                TableFunctions();     // entries in the safety table
-    bool               SweepMode();          // the SWEEP_MODE marker exists (filesystem only: any thread)
+    bool               SweepMode();
+    // run_native_op `call` (#11): the class an ISDK method inherits from its vs.* twin, or "unclassified".
+    void               IsdkClass(const std::string& fn, std::string& cls, std::string& via);          // the SWEEP_MODE marker exists (filesystem only: any thread)
 
     nlohmann::json Refusal(const std::string& cls, const std::string& reason, const std::string& advice = "");
 

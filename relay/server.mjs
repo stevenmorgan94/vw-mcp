@@ -206,12 +206,21 @@ function buildMcpServer() {
     'polygon, layer, viewport, group, duplicate, move, rotate, delete, clearLayer. Generic call: ' +
     '{"op":"call","fn":"<ISDK method>","args":[...],"as":<int>}; args: numbers/bools/strings literal, ' +
     '[x,y]/[x,y,z] = point, [x1,y1,x2,y2] = rect, handles via {"$h":id} / {"$name":"X"} / {"$layer":"X"}. ' +
-    '{"op":"clearHandles"} resets the handle registry. One undo step per call.',
-    { ops: z.union([z.string(), z.array(z.any())]).describe('JSON array of operations (or its JSON text).') },
-    async ({ ops }) => {
+    '{"op":"clearHandles"} resets the handle registry. One undo step per call. "call" is safety-checked: each ISDK ' +
+    'method takes the class of its tested vs.* twin (crashers, dialogs and event-only methods are refused; methods ' +
+    'with no twin need allowUnclassified), and handle arguments that name a missing object are refused.',
+    {
+      ops: z.union([z.string(), z.array(z.any())]).describe('JSON array of operations (or its JSON text).'),
+      allowUnclassified: z.boolean().optional()
+        .describe('Allow "call" on ISDK methods with no safety class yet (no tested vs.* twin). At your own risk.'),
+      allowDocumentLevel: z.boolean().optional()
+        .describe('Allow "call" on methods that open, close or replace documents or windows.'),
+    },
+    async ({ ops, allowUnclassified, allowDocumentLevel }) => {
       try {
         const code = typeof ops === 'string' ? ops : JSON.stringify(ops);
-        return toResult(await runJob({ code, lang: 'ops' }, 30));
+        return toResult(await runJob({ code, lang: 'ops', allowUnclassified: !!allowUnclassified,
+          allowDocumentLevel: !!allowDocumentLevel }, 30));
       } catch (e) { return asError(e.message || String(e)); }
     },
   );
@@ -238,6 +247,10 @@ function buildMcpServer() {
         signature: signatures[key] ?? null,
         allowedByDefault: !!e && (e.class === 'safe' || !!e.reroute),
         needs: !e ? 'allowUnclassified: true' : e.class === 'document-level' ? 'allowDocumentLevel: true' : null,
+        nativeCall: (() => {   // run_native_op "call" with the ISDK method of the same name
+          const k = Object.keys(safetyTable.isdk || {}).find((x) => x.toLowerCase() === n.toLowerCase());
+          return k ? { method: k, class: safetyTable.isdk[k].class, via: 'vs.' + safetyTable.isdk[k].via } : null;
+        })(),
         table: { vwBuild: safetyTable.vwBuild, source: safetyTable.source },
       });
     },
