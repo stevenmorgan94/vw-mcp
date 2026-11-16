@@ -12,6 +12,7 @@
 #include "Bridge.h"
 #include "ScriptRunner.h"
 #include "HeadlessHost.h"
+#include "palette/StatusPalette.h"
 
 #define CPPHTTPLIB_THREAD_POOL_COUNT 4
 #include "../../third_party/cpp-httplib/httplib.h"
@@ -212,7 +213,7 @@ namespace Bridge
         res.set_content(j.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), "application/json");
     }
 
-    static nlohmann::json StatusJson()
+    nlohmann::json StatusJson()
     {
         nlohmann::json s = {
             { "ok", true }, { "plugin", "vw-mcp" }, { "pluginVersion", kPluginVersion },
@@ -220,6 +221,8 @@ namespace Bridge
             { "sweepMode", gSweep.load() }, { "documentOpen", gDocOpen.load() },
             { "busy", gBusy ? nlohmann::json(BusyReason()) : nlohmann::json(nullptr) },
             { "port", gPort.load() }, { "pid", (int)getpid() },
+            { "helpMenuItem", HelpMenuItemResult() },
+            { "tableBuild", TableBuild() }, { "tableFunctions", TableFunctions() },
         };
         std::lock_guard<std::mutex> lk(gMu);
         nlohmann::json clients = nlohmann::json::array();

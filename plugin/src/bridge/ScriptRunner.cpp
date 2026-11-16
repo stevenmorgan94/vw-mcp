@@ -24,6 +24,8 @@ namespace VwMcp
 
     static std::string gDataFolder;
     static std::string gVwBuild;
+    static std::string gTableBuild;
+    static int         gTableFunctions = 0;
     static const char* kGuardMarker = "\x1eVWGUARD ";
 
     void InitHostInfo()
@@ -43,11 +45,19 @@ namespace VwMcp
         if (v && CFGetTypeID(v) == CFStringGetTypeID() && CFStringGetCString((CFStringRef)v, buf, sizeof(buf), kCFStringEncodingUTF8))
             gVwBuild = buf;
 #endif
+        nlohmann::json t = nlohmann::json::parse(kVsSafetyTable, nullptr, false);
+        if (!t.is_discarded())
+        {
+            gTableBuild = t.value("vwBuild", "");
+            if (t.contains("functions")) gTableFunctions = (int)t["functions"].size();
+        }
         // TODO(#9): Windows build string (ISDK::GetHostInfo or the exe version resource).
     }
 
     const std::string& DataFolder()       { return gDataFolder; }
     const std::string& VectorworksBuild() { return gVwBuild; }
+    const std::string& TableBuild()       { return gTableBuild; }
+    int                TableFunctions()   { return gTableFunctions; }
 
     static std::string ReadDataFile(const char* name, bool* exists = nullptr)
     {
