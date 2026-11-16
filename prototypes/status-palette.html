@@ -1,0 +1,195 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>vw-mcp Status Palette</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* PROTOTYPE (vw-mcp ticket #4): three structurally different status palettes, switch with the bar or ← →.
+   Layout: a stage showing one VW-palette-sized window, with a "simulate state" strip above it. */
+:root {
+  --bg: #e9ecef; --stage: #dde2e6; --win: #f7f8f9; --chrome: #cfd5da; --fg: #1d2329; --muted: #5d6873;
+  --line: #c6cdd3; --accent: #1f6fb2; --ok: #1f8a4c; --warn: #b7791f; --bad: #c0392b; --code: #eef1f4;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15191d; --stage: #1b2025; --win: #23292f; --chrome: #2e353c; --fg: #e3e8ec; --muted: #9aa5af;
+  --line: #3a434b; --accent: #5aa7e6; --ok: #49b97a; --warn: #e0a84a; --bad: #e66b5e; --code: #1a1f24; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #15191d; --stage: #1b2025; --win: #23292f; --chrome: #2e353c; --fg: #e3e8ec; --muted: #9aa5af;
+  --line: #3a434b; --accent: #5aa7e6; --ok: #49b97a; --warn: #e0a84a; --bad: #e66b5e; --code: #1a1f24; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--fg); font: 13px/1.45 var(--sans);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 96px }
+.top { max-width: 760px; margin: 0 auto 16px; display: flex; flex-direction: column; gap: 8px }
+.top h1 { font-size: 16px; margin: 0; font-weight: 600 }
+.top p { margin: 0; color: var(--muted); max-width: 65ch }
+.sim { display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
+.sim span { color: var(--muted); font-size: 12px; margin-right: 4px }
+.sim button { font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--win); color: var(--fg); cursor: pointer }
+.sim button[aria-pressed="true"] { background: var(--fg); color: var(--win); border-color: var(--fg) }
+.stage { display: flex; justify-content: center; padding: 24px 0; background: var(--stage); border-radius: 10px; max-width: 760px; margin: 0 auto }
+.win { width: 340px; max-width: 100%; background: var(--win); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgb(0 0 0 / .12); overflow: hidden }
+.tb { background: var(--chrome); padding: 5px 10px; font-size: 11px; color: var(--muted); display: flex; gap: 6px; align-items: center }
+.tb i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); display: inline-block }
+.tb b { font-weight: 500; margin-left: 6px }
+.pane { padding: 12px; display: flex; flex-direction: column; gap: 12px }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none }
+.s-ok { background: var(--ok) } .s-warn { background: var(--warn) } .s-bad { background: var(--bad) }
+.t-ok { color: var(--ok) } .t-warn { color: var(--warn) } .t-bad { color: var(--bad) }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 12px }
+.kv dt { color: var(--muted) } .kv dd { margin: 0; font-family: var(--mono); font-size: 11.5px; min-width: 0; overflow-wrap: anywhere }
+.label { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600 }
+pre { margin: 0; background: var(--code); border: 1px solid var(--line); border-radius: 5px; padding: 8px; font: 11px/1.45 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere }
+.copyrow { display: flex; flex-direction: column; gap: 4px }
+.copybtn { align-self: flex-end; font: inherit; font-size: 11.5px; padding: 3px 9px; border-radius: 4px; border: 1px solid var(--accent); color: var(--accent); background: transparent; cursor: pointer }
+.copybtn:focus-visible, .sim button:focus-visible, .tabs button:focus-visible, select:focus-visible, .sw button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line) }
+.tabs button { font: inherit; font-size: 12px; background: none; border: 0; padding: 6px 10px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px }
+.tabs button[aria-selected="true"] { color: var(--fg); border-color: var(--accent); font-weight: 500 }
+select { font: inherit; font-size: 12px; padding: 4px 6px; border-radius: 4px; border: 1px solid var(--line); background: var(--win); color: var(--fg); width: 100% }
+.note { font-size: 12px; color: var(--muted); margin: 0 }
+.banner { padding: 8px 10px; border-radius: 5px; font-size: 12px; border: 1px solid; display: flex; gap: 8px; align-items: flex-start }
+.banner.warn { border-color: var(--warn); color: var(--fg); background: color-mix(in srgb, var(--warn) 12%, transparent) }
+.banner.bad { border-color: var(--bad); color: var(--fg); background: color-mix(in srgb, var(--bad) 10%, transparent) }
+/* A: status-first */
+.hero { display: flex; gap: 10px; align-items: center }
+.hero .big { width: 14px; height: 14px; border-radius: 50% }
+.hero h2 { margin: 0; font-size: 15px; font-weight: 600 }
+.hero p { margin: 0; color: var(--muted); font-size: 12px }
+details { border-top: 1px solid var(--line); padding-top: 10px }
+summary { cursor: pointer; font-weight: 500 }
+/* B: checklist */
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px }
+.steps li { display: grid; grid-template-columns: 22px 1fr; gap: 8px }
+.chk { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 600; border: 1.5px solid var(--line); color: var(--muted) }
+.chk.done { background: var(--ok); border-color: var(--ok); color: var(--win) }
+.chk.fail { background: var(--bad); border-color: var(--bad); color: var(--win) }
+.steps h3 { margin: 0; font-size: 13px; font-weight: 600 } .steps .body { display: flex; flex-direction: column; gap: 6px; min-width: 0 }
+.strip { display: flex; gap: 8px; align-items: center; font-size: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line) }
+/* C: tabs + activity */
+.log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; font-size: 11.5px }
+.log li { display: grid; grid-template-columns: 52px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line) }
+.log time { font-family: var(--mono); color: var(--muted) } .log code { font-family: var(--mono) }
+.pill { display: inline-block; font-size: 10.5px; padding: 0 6px; border-radius: 999px; border: 1px solid currentColor; margin-left: 4px }
+.cstrip { display: flex; justify-content: space-between; align-items: center; font-size: 12px }
+/* switcher */
+.sw { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 4px; background: #111; color: #fff; border-radius: 999px; padding: 4px; box-shadow: 0 6px 20px rgb(0 0 0 / .35); z-index: 20; max-width: calc(100% - 32px) }
+.sw button { background: transparent; color: #fff; border: 0; font: 600 14px var(--sans); width: 32px; height: 32px; border-radius: 50%; cursor: pointer }
+.sw button:hover { background: #333 }
+.sw span { font-size: 12.5px; padding: 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+@media (prefers-reduced-motion: no-preference) { .dot.pulse { animation: p 2s ease-in-out infinite } @keyframes p { 50% { opacity: .45 } } }
+</style>
+
+<div class="top">
+  <h1>vw-mcp status palette, prototype for ticket #4</h1>
+  <p>One palette window, three layouts. Flip with the bar at the bottom or the ← → keys. Use the buttons below to see each layout in a different bridge state. Nothing here talks to Vectorworks.</p>
+  <div class="sim" role="group" aria-label="Simulate bridge state"><span>Simulate:</span>
+    <button data-s="connected">Connected</button>
+    <button data-s="noai">Running, no AI yet</button>
+    <button data-s="busy">Dialog open</button>
+    <button data-s="nodoc">No document</button>
+    <button data-s="mismatch">New VW build</button>
+    <button data-s="down">Server failed</button>
+  </div>
+</div>
+<div class="stage"><div class="win" id="win"></div></div>
+<div class="sw" role="toolbar" aria-label="Prototype variant switcher">
+  <button id="prev" aria-label="Previous variant">←</button><span id="vlabel"></span><button id="next" aria-label="Next variant">→</button>
+</div>
+
+<script>
+const STATES = {
+  connected: { level: 'ok', head: 'Connected', sub: 'Claude Code is connected. Last job 12 s ago.', server: 'Listening on 127.0.0.1:47823', ai: 'Claude Code (1 client)', doc: 'Untitled 1', busy: null, build: '32.0.0 (882075)', table: '32.0.0 (882075)', aiOk: true },
+  noai: { level: 'warn', head: 'Waiting for your AI', sub: 'The bridge is running. No AI client has connected yet.', server: 'Listening on 127.0.0.1:47823', ai: 'none yet', doc: 'Untitled 1', busy: null, build: '32.0.0 (882075)', table: '32.0.0 (882075)', aiOk: false },
+  busy: { level: 'warn', head: 'Paused: a dialog is open', sub: 'Jobs wait 10 s, then are refused. Close the dialog to continue.', server: 'Listening on 127.0.0.1:47823', ai: 'Claude Code (1 client)', doc: 'Untitled 1', busy: 'a dialog is open', build: '32.0.0 (882075)', table: '32.0.0 (882075)', aiOk: true },
+  nodoc: { level: 'warn', head: 'Open a document', sub: 'Scripts are refused until a drawing is open.', server: 'Listening on 127.0.0.1:47823', ai: 'Claude Code (1 client)', doc: 'none', busy: null, build: '32.0.0 (882075)', table: '32.0.0 (882075)', aiOk: true },
+  mismatch: { level: 'warn', head: 'Connected, new Vectorworks build', sub: 'The safety table was tested on an older build. It still applies, but re-test when you can.', server: 'Listening on 127.0.0.1:47823', ai: 'Claude Code (1 client)', doc: 'Untitled 1', busy: null, build: '32.0.1 (889140)', table: '32.0.0 (882075)', aiOk: true },
+  down: { level: 'bad', head: 'Bridge not running', sub: 'Ports 47823–47830 are all in use. Quit the app using them, then restart Vectorworks.', server: 'not listening', ai: 'none', doc: 'Untitled 1', busy: null, build: '32.0.0 (882075)', table: '32.0.0 (882075)', aiOk: false },
+};
+const CLIENTS = {
+  desktop: { name: 'Claude Desktop', how: 'Download vw-mcp.mcpb and double-click it. Claude Desktop installs it as an extension. No other setup.', code: null },
+  code: { name: 'Claude Code', how: 'Run this once in a terminal:', code: 'claude mcp add vw-mcp -- npx -y vw-mcp' },
+  cursor: { name: 'Cursor / VS Code / other', how: 'Add this to your client’s MCP settings (needs Node.js 20+):', code: '{\n  "mcpServers": {\n    "vw-mcp": { "command": "npx", "args": ["-y", "vw-mcp"] }\n  }\n}' },
+};
+const PROMPT = `You can control Vectorworks through the vw-mcp tools.
+- Call vw_bridge_status first. If documentOpen is false, ask me to open a drawing.
+- Run Python with execute_script (the vs module is available). print() JSON to return data.
+- Every vs.* call is safety-checked. A refusal comes back as an error with reason and advice. Don't retry a refused call; use the alternative it names.
+- Use vw_lookup_function before calling an unfamiliar vs.* function.
+- Only set allowUnclassified or allowDocumentLevel if I ask you to.
+- Each job is one undo step in Vectorworks.`;
+const LOG = [
+  ['10:42', 'ok', 'execute_script: 12 calls (Rect, Layer, BeginPoly…)'],
+  ['10:41', 'bad', 'refused <code>vs.AddVectorFillLayer</code><span class="pill t-bad">crasher</span>'],
+  ['10:39', 'ok', 'vw_lookup_function: CreateEditText'],
+  ['10:37', 'warn', 'timeout after 30 s, stopped (undo reverts)'],
+  ['10:30', 'ok', 'AI client connected: Claude Code'],
+];
+let state = 'connected', client = 'code', tabC = 'status';
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const copy = (id, label) => `<div class="copyrow"><pre id="${id}">${esc(label)}</pre><button class="copybtn" data-copy="${id}">Copy</button></div>`;
+const facts = (s) => `<dl class="kv">
+  <dt>Bridge</dt><dd class="${s.server.startsWith('not') ? 't-bad' : ''}">${s.server}</dd>
+  <dt>AI client</dt><dd>${s.ai}</dd>
+  <dt>Document</dt><dd class="${s.doc === 'none' ? 't-warn' : ''}">${s.doc}</dd>
+  <dt>Vectorworks</dt><dd class="${s.build !== s.table ? 't-warn' : ''}">${s.build}</dd>
+  <dt>Safety table</dt><dd>${s.table} · 2,827 functions</dd></dl>`;
+const clientPicker = (id) => `<label class="label" for="${id}">Your AI app</label>
+  <select id="${id}" data-client>${Object.entries(CLIENTS).map(([k, c]) => `<option value="${k}"${k === client ? ' selected' : ''}>${c.name}</option>`).join('')}</select>
+  <p class="note">${CLIENTS[client].how}</p>${CLIENTS[client].code ? copy('snip-' + id, CLIENTS[client].code) : '<button class="copybtn" style="align-self:flex-start">Show vw-mcp.mcpb in Finder</button>'}`;
+
+const VARIANTS = [
+  { key: 'A', name: 'Status first', render(s) {
+    return `<div class="pane">
+      <div class="hero"><span class="big dot s-${s.level} ${s.level === 'ok' ? 'pulse' : ''}"></span><div><h2>${s.head}</h2><p>${s.sub}</p></div></div>
+      ${facts(s)}
+      <details ${s.aiOk ? '' : 'open'}><summary>Connect your AI</summary><div class="pane" style="padding:10px 0 0">${clientPicker('a')}
+        <span class="label">Tell your AI</span>${copy('prompt-a', PROMPT)}</div></details>
+    </div>`; } },
+  { key: 'B', name: 'Setup checklist', render(s) {
+    const st = (ok, bad) => ok ? '<span class="chk done">✓</span>' : bad ? '<span class="chk fail">!</span>' : '<span class="chk">·</span>';
+    return `<div class="pane">
+      <div class="strip"><span class="dot s-${s.level}"></span><strong>${s.head}</strong></div>
+      ${s.build !== s.table ? `<div class="banner warn">Vectorworks ${s.build} is newer than the safety table (${s.table}).</div>` : ''}
+      <ol class="steps">
+        <li>${st(!s.server.startsWith('not'), s.server.startsWith('not'))}<div class="body"><h3>Bridge running in Vectorworks</h3><p class="note">${s.server}</p></div></li>
+        <li>${st(s.aiOk, false)}<div class="body"><h3>Connect your AI app</h3>${s.aiOk ? `<p class="note">${s.ai}. <a href="#" data-reveal>Set up another app</a></p>` : clientPicker('b')}</div></li>
+        <li>${st(s.aiOk, false)}<div class="body"><h3>Give your AI the house rules</h3>${copy('prompt-b', PROMPT)}</div></li>
+        <li>${st(s.doc !== 'none' && !s.busy, false)}<div class="body"><h3>Ready for jobs</h3><p class="note">${s.busy ? 'Paused: ' + s.busy + '.' : s.doc === 'none' ? 'Open a drawing first.' : 'Drawing open: ' + s.doc + '.'}</p></div></li>
+      </ol></div>`; } },
+  { key: 'C', name: 'Tabs + activity log', render(s) {
+    const tab = (k, l) => `<button role="tab" aria-selected="${tabC === k}" data-tab="${k}">${l}</button>`;
+    let body = '';
+    if (tabC === 'status') body = `${s.level !== 'ok' ? `<div class="banner ${s.level}"><span class="dot s-${s.level}" style="margin-top:3px"></span><div><strong>${s.head}.</strong> ${s.sub}</div></div>` : ''}${facts(s)}`;
+    if (tabC === 'connect') body = `${clientPicker('c')}<span class="label">Tell your AI</span>${copy('prompt-c', PROMPT)}`;
+    if (tabC === 'activity') body = `<ul class="log">${LOG.map(([t, l, x]) => `<li><time>${t}</time><span class="${l === 'ok' ? '' : 't-' + l}">${x}</span></li>`).join('')}</ul><p class="note">Last 50 jobs. Refusals name the function and why.</p>`;
+    return `<div class="pane"><div class="cstrip"><span><span class="dot s-${s.level}"></span> ${s.head}</span><span class="note">${s.ai}</span></div>
+      <div class="tabs" role="tablist">${tab('status', 'Status')}${tab('connect', 'Connect AI')}${tab('activity', 'Activity')}</div>${body}</div>`; } },
+];
+let vi = Math.max(0, VARIANTS.findIndex((v) => '#' + v.key.toLowerCase() === location.hash));
+function draw() {
+  const v = VARIANTS[vi], s = STATES[state];
+  document.getElementById('win').innerHTML = `<div class="tb"><i></i><i></i><i></i><b>vw-mcp</b></div>` + v.render(s);
+  document.getElementById('vlabel').textContent = `${v.key} (${v.name})`;
+  document.querySelectorAll('.sim button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.s === state));
+}
+function go(d) { vi = (vi + d + VARIANTS.length) % VARIANTS.length; history.replaceState(null, '', '#' + VARIANTS[vi].key.toLowerCase()); draw(); }
+document.getElementById('prev').onclick = () => go(-1);
+document.getElementById('next').onclick = () => go(1);
+addEventListener('hashchange', () => { const i = VARIANTS.findIndex((v) => '#' + v.key.toLowerCase() === location.hash); if (i >= 0) { vi = i; draw(); } });
+addEventListener('keydown', (e) => { if (e.target.closest('input,textarea,select,[contenteditable]')) return; if (e.key === 'ArrowLeft') go(-1); if (e.key === 'ArrowRight') go(1); });
+document.addEventListener('click', (e) => {
+  const sb = e.target.closest('.sim button'); if (sb) { state = sb.dataset.s; draw(); return; }
+  const t = e.target.closest('[data-tab]'); if (t) { tabC = t.dataset.tab; draw(); return; }
+  const r = e.target.closest('[data-reveal]'); if (r) { e.preventDefault(); STATES[state] = { ...STATES[state], aiOk: false }; draw(); return; }
+  const c = e.target.closest('[data-copy]'); if (c) {
+    const pre = document.getElementById(c.dataset.copy);
+    const done = () => { c.textContent = 'Copied'; setTimeout(() => (c.textContent = 'Copy'), 1200); };
+    try { navigator.clipboard.writeText(pre.textContent).then(done, () => { getSelection().selectAllChildren(pre); }); } catch { getSelection().selectAllChildren(pre); }
+  }
+});
+document.addEventListener('change', (e) => { if (e.target.matches('[data-client]')) { client = e.target.value; draw(); } });
+draw();
+</script>
+</html>
