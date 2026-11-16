@@ -20,6 +20,8 @@ namespace VwMcp
 
     const std::string& DataFolder();         // Plug-ins/Data/vw-mcp/ in the user folder
     const std::string& VectorworksBuild();   // e.g. "32.0.0 (882075)"
+    const std::string& TableBuild();         // the build the safety table was swept on
+    int                TableFunctions();     // entries in the safety table
     bool               SweepMode();          // the SWEEP_MODE marker exists (filesystem only: any thread)
 
     nlohmann::json Refusal(const std::string& cls, const std::string& reason, const std::string& advice = "");

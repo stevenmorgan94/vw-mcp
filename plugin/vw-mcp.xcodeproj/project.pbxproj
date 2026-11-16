@@ -12,6 +12,7 @@
 		A10000000000000000000120 /* Bridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000020 /* Bridge.cpp */; };
 		A10000000000000000000122 /* ScriptRunner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000022 /* ScriptRunner.cpp */; };
 		A10000000000000000000125 /* NativeOps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000025 /* NativeOps.cpp */; };
+		A10000000000000000000130 /* StatusPalette.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000030 /* StatusPalette.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,9 @@
 		A10000000000000000000024 /* SdkScopes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SdkScopes.h; sourceTree = "<group>"; };
 		A10000000000000000000025 /* NativeOps.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NativeOps.cpp; sourceTree = "<group>"; };
 		A10000000000000000000026 /* NativeOps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NativeOps.h; sourceTree = "<group>"; };
+		A10000000000000000000030 /* StatusPalette.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StatusPalette.cpp; sourceTree = "<group>"; };
+		A10000000000000000000031 /* StatusPalette.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatusPalette.h; sourceTree = "<group>"; };
+		A10000000000000000000032 /* PaletteHtml.generated.inc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PaletteHtml.generated.inc; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +68,7 @@
 				A10000000000000000000303 /* bridge */,
 				A10000000000000000000304 /* nativeops */,
 				A10000000000000000000305 /* safety */,
+				A10000000000000000000308 /* palette */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -114,6 +119,16 @@
 				A10000000000000000000010 /* vw-mcp.vwlibrary */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000308 /* palette */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000032 /* PaletteHtml.generated.inc */,
+				A10000000000000000000031 /* StatusPalette.h */,
+				A10000000000000000000030 /* StatusPalette.cpp */,
+			);
+			path = palette;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -188,6 +203,7 @@
 			files = (
 				A10000000000000000000101 /* ModuleMain.cpp in Sources */,
 				A10000000000000000000102 /* HeadlessHost.cpp in Sources */,
+				A10000000000000000000130 /* StatusPalette.cpp in Sources */,
 				A10000000000000000000125 /* NativeOps.cpp in Sources */,
 				A10000000000000000000122 /* ScriptRunner.cpp in Sources */,
 				A10000000000000000000120 /* Bridge.cpp in Sources */,

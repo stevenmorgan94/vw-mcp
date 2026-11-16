@@ -19,5 +19,6 @@ namespace VwMcp
     {
         void Start();   // main thread, at launch (IObjUpdateSupport::Init)
         void Stop();    // main thread, at application shutdown
+        nlohmann::json StatusJson();   // the GET /status body; any thread
     }
 }

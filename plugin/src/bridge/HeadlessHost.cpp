@@ -4,6 +4,7 @@
 
 #include "HeadlessHost.h"
 #include "Bridge.h"
+#include "palette/StatusPalette.h"
 
 #if GS_MAC
 #include <os/log.h>
