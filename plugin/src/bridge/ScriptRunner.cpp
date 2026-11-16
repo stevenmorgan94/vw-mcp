@@ -26,6 +26,7 @@ namespace VwMcp
     static std::string gVwBuild;
     static std::string gTableBuild;
     static int         gTableFunctions = 0;
+    static std::map<std::string, std::pair<std::string, std::string>> gIsdk;   // ISDK method -> (class, vs twin)
     static const char* kGuardMarker = "\x1eVWGUARD ";
 
     void InitHostInfo()
@@ -50,6 +51,9 @@ namespace VwMcp
         {
             gTableBuild = t.value("vwBuild", "");
             if (t.contains("functions")) gTableFunctions = (int)t["functions"].size();
+            if (t.contains("isdk"))
+                for (auto& [k, v] : t["isdk"].items())
+                    gIsdk[k] = { v.value("class", ""), v.value("via", "") };
         }
         // TODO(#9): Windows build string (ISDK::GetHostInfo or the exe version resource).
     }
@@ -58,6 +62,14 @@ namespace VwMcp
     const std::string& VectorworksBuild() { return gVwBuild; }
     const std::string& TableBuild()       { return gTableBuild; }
     int                TableFunctions()   { return gTableFunctions; }
+
+    void IsdkClass(const std::string& fn, std::string& cls, std::string& via)
+    {
+        auto it = gIsdk.find(fn);
+        if (it == gIsdk.end()) { cls = "unclassified"; via.clear(); return; }
+        cls = it->second.first;
+        via = it->second.second;
+    }
 
     static std::string ReadDataFile(const char* name, bool* exists = nullptr)
     {
@@ -188,7 +200,7 @@ namespace VwMcp
         {
             ScriptDialogGuard guard;
             UndoEventScope undoScope("MCP Native Ops");
-            return RunNativeOps(job.code);
+            return RunNativeOps(job.code, job.opts);
         }
         if (job.lang != "python")
             return Refusal("language", "Only Python is supported (lang: \"" + job.lang + "\"): the safety layer can't see inside VectorScript.");

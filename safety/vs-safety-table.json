@@ -10332,6 +10332,2352 @@
 "class": "event-only"
 }
 },
+"isdk": {
+"AddButtonMode": {
+"class": "interactive",
+"via": "AddButtonMode"
+},
+"AddChoice": {
+"class": "interactive",
+"via": "AddChoice"
+},
+"AddListBoxTabStop": {
+"class": "interactive",
+"via": "AddListBoxTabStop"
+},
+"AddListBrowserImage": {
+"class": "interactive",
+"via": "AddListBrowserImage"
+},
+"AddResourceToList": {
+"class": "safe",
+"via": "AddResourceToList"
+},
+"AddStoryLevel": {
+"class": "safe",
+"via": "AddStoryLevel"
+},
+"AddTileGeometryObject": {
+"class": "safe",
+"via": "AddTileGeometryObject"
+},
+"AdjustComponentPixelPos": {
+"class": "interactive",
+"via": "AdjustComponentPixelPos"
+},
+"AlertCritical": {
+"class": "interactive",
+"via": "AlertCritical"
+},
+"AlertInform": {
+"class": "interactive",
+"via": "AlertInform"
+},
+"AlertQuestion": {
+"class": "interactive",
+"via": "AlertQuestion"
+},
+"AppendRoofEdge": {
+"class": "safe",
+"via": "AppendRoofEdge"
+},
+"AreWorksheetGridLinesVisible": {
+"class": "safe",
+"via": "AreWorksheetGridLinesVisible"
+},
+"AssociateLayerWithStory": {
+"class": "safe",
+"via": "AssociateLayerWithStory"
+},
+"AssociateLinearDimension": {
+"class": "safe",
+"via": "AssociateLinearDimension"
+},
+"AttachDefaultTextureSpace": {
+"class": "safe",
+"via": "AttachDefaultTextureSpace"
+},
+"BeginMultipleDuplicate": {
+"class": "safe",
+"via": "BeginMultipleDuplicate"
+},
+"BuildConstraintModelForObject": {
+"class": "safe",
+"via": "BuildConstraintModelForObject"
+},
+"CalcSurfaceArea": {
+"class": "safe",
+"via": "CalcSurfaceArea"
+},
+"CalcVolume": {
+"class": "safe",
+"via": "CalcVolume"
+},
+"Centroid3D": {
+"class": "safe",
+"via": "Centroid3D"
+},
+"ClearGradientSliderSegments": {
+"class": "interactive",
+"via": "ClearGradientSliderSegments"
+},
+"ClipSurface": {
+"class": "safe",
+"via": "ClipSurface"
+},
+"CombineIntoSurface": {
+"class": "safe",
+"via": "CombineIntoSurface"
+},
+"ConvertToNURBS": {
+"class": "safe",
+"via": "ConvertToNURBS"
+},
+"ConvertToPolygon": {
+"class": "safe",
+"via": "ConvertToPolygon"
+},
+"ConvertToPolyline": {
+"class": "safe",
+"via": "ConvertToPolyline"
+},
+"ConvertToUnstyledSlab": {
+"class": "safe",
+"via": "ConvertToUnstyledSlab"
+},
+"ConvertToUnstyledWall": {
+"class": "safe",
+"via": "ConvertToUnstyledWall"
+},
+"CopySymbol": {
+"class": "safe",
+"via": "CopySymbol"
+},
+"CountFillSpaces": {
+"class": "safe",
+"via": "CountFillSpaces"
+},
+"CreateArcN": {
+"class": "safe",
+"via": "Arc"
+},
+"CreateBatDormer": {
+"class": "safe",
+"via": "CreateBatDormer"
+},
+"CreateCenteredStaticText": {
+"class": "interactive",
+"via": "CreateCenteredStaticText"
+},
+"CreateChainDimension": {
+"class": "safe",
+"via": "CreateChainDimension"
+},
+"CreateCheckBox": {
+"class": "interactive",
+"via": "CreateCheckBox"
+},
+"CreateCheckBoxGroupBox": {
+"class": "interactive",
+"via": "CreateCheckBoxGroupBox"
+},
+"CreateClassPullDownMenu": {
+"class": "interactive",
+"via": "CreateClassPullDownMenu"
+},
+"CreateColorPopup": {
+"class": "interactive",
+"via": "CreateColorPopup"
+},
+"CreateCone": {
+"class": "safe",
+"via": "CreateCone"
+},
+"CreateContourCurves": {
+"class": "safe",
+"via": "CreateContourCurves"
+},
+"CreateCustomControl": {
+"class": "interactive",
+"via": "CreateCustomControl"
+},
+"CreateCustomObject": {
+"class": "safe",
+"via": "CreateCustomObject"
+},
+"CreateDesignLayerPullDownMenu": {
+"class": "interactive",
+"via": "CreateDesignLayerPullDownMenu"
+},
+"CreateEditColorText": {
+"class": "interactive",
+"via": "CreateEditColorText"
+},
+"CreateEditInteger": {
+"class": "interactive",
+"via": "CreateEditInteger"
+},
+"CreateEditPassword": {
+"class": "interactive",
+"via": "CreateEditPassword"
+},
+"CreateEditReal": {
+"class": "interactive",
+"via": "CreateEditReal"
+},
+"CreateEditText": {
+"class": "interactive",
+"via": "CreateEditText"
+},
+"CreateEnhancedPullDownMenu": {
+"class": "interactive",
+"via": "CreateEnhancedPullDownMenu"
+},
+"CreateFillSpace": {
+"class": "safe",
+"via": "CreateFillSpace"
+},
+"CreateGableDormer": {
+"class": "safe",
+"via": "CreateGableDormer"
+},
+"CreateGradient": {
+"class": "interactive",
+"via": "CreateGradient"
+},
+"CreateGroupBox": {
+"class": "interactive",
+"via": "CreateGroupBox"
+},
+"CreateGroupOutline": {
+"class": "safe",
+"via": "CreateGroupOutline"
+},
+"CreateHemisphere": {
+"class": "safe",
+"via": "CreateHemisphere"
+},
+"CreateHipDormer": {
+"class": "safe",
+"via": "CreateHipDormer"
+},
+"CreateIconPushButton": {
+"class": "interactive",
+"via": "CreateIconPushButton"
+},
+"CreateImageControl": {
+"class": "interactive",
+"via": "CreateImageControl"
+},
+"CreateImageControl2": {
+"class": "interactive",
+"via": "CreateImageControl2"
+},
+"CreateImageFromPaint": {
+"class": "safe",
+"via": "CreateImageFromPaint"
+},
+"CreateImageProp": {
+"class": "safe",
+"via": "CreateImageProp"
+},
+"CreateInterpolatedSurface": {
+"class": "safe",
+"via": "CreateInterpolatedSurface"
+},
+"CreateLayer": {
+"class": "safe",
+"via": "CreateLayer"
+},
+"CreateLayerLevelType": {
+"class": "safe",
+"via": "CreateLayerLevelType"
+},
+"CreateLayout": {
+"class": "interactive",
+"via": "CreateLayout"
+},
+"CreateLine": {
+"class": "safe",
+"via": "LineTo"
+},
+"CreateLineAttributePopup": {
+"class": "interactive",
+"via": "CreateLineAttributePopup"
+},
+"CreateLineStylePopup": {
+"class": "interactive",
+"via": "CreateLineStylePopup"
+},
+"CreateLineWeightPopup": {
+"class": "interactive",
+"via": "CreateLineWeightPopup"
+},
+"CreateListBox": {
+"class": "interactive",
+"via": "CreateListBox"
+},
+"CreateListBoxN": {
+"class": "interactive",
+"via": "CreateListBoxN"
+},
+"CreateLocus": {
+"class": "safe",
+"via": "Locus"
+},
+"CreateLocus3D": {
+"class": "safe",
+"via": "Locus3D"
+},
+"CreateLoftSurfaces": {
+"class": "safe",
+"via": "CreateLoftSurfaces"
+},
+"CreateMarkerPopup": {
+"class": "interactive",
+"via": "CreateMarkerPopup"
+},
+"CreateMaterial": {
+"class": "safe",
+"via": "CreateMaterial"
+},
+"CreateNurbsCurve": {
+"class": "safe",
+"via": "CreateNurbsCurve"
+},
+"CreateNurbsSurface": {
+"class": "safe",
+"via": "CreateNurbsSurface"
+},
+"CreateOffsetNurbsObjectHandle": {
+"class": "safe",
+"via": "CreateOffsetNurbsObjectHandle"
+},
+"CreateOval": {
+"class": "safe",
+"via": "Oval"
+},
+"CreatePaintFromImage": {
+"class": "safe",
+"via": "CreatePaintFromImage"
+},
+"CreatePatternPopup": {
+"class": "interactive",
+"via": "CreatePatternPopup"
+},
+"CreatePullDownMenu": {
+"class": "interactive",
+"via": "CreatePullDownMenu"
+},
+"CreatePullDownMenuGroupBox": {
+"class": "interactive",
+"via": "CreatePullDownMenuGroupBox"
+},
+"CreatePushButton": {
+"class": "interactive",
+"via": "CreatePushButton"
+},
+"CreateRadioButton": {
+"class": "interactive",
+"via": "CreateRadioButton"
+},
+"CreateRadioButtonGroupBox": {
+"class": "interactive",
+"via": "CreateRadioButtonGroupBox"
+},
+"CreateRectangle": {
+"class": "safe",
+"via": "Rect"
+},
+"CreateRenderworksStyle": {
+"class": "safe",
+"via": "CreateRenderworksStyle"
+},
+"CreateResizableLayout": {
+"class": "interactive",
+"via": "CreateResizableLayout"
+},
+"CreateRightStaticText": {
+"class": "interactive",
+"via": "CreateRightStaticText"
+},
+"CreateRoof": {
+"class": "safe",
+"via": "CreateRoof"
+},
+"CreateRoofStyle": {
+"class": "safe",
+"via": "CreateRoofStyle"
+},
+"CreateScriptResource": {
+"class": "safe",
+"via": "CreateScriptResource"
+},
+"CreateSearchEditBox": {
+"class": "interactive",
+"via": "CreateSearchEditBox"
+},
+"CreateSeparator": {
+"class": "interactive",
+"via": "CreateSeparator"
+},
+"CreateShaderRecord": {
+"class": "safe",
+"via": "CreateShaderRecord"
+},
+"CreateShedDormer": {
+"class": "safe",
+"via": "CreateShedDormer"
+},
+"CreateSheetLayerPullDownMenu": {
+"class": "interactive",
+"via": "CreateSheetLayerPullDownMenu"
+},
+"CreateSkylight": {
+"class": "safe",
+"via": "CreateSkylight"
+},
+"CreateSlab": {
+"class": "safe",
+"via": "CreateSlab"
+},
+"CreateSlabStyle": {
+"class": "safe",
+"via": "CreateSlabStyle"
+},
+"CreateSphere": {
+"class": "safe",
+"via": "CreateSphere"
+},
+"CreateStandardIconControl": {
+"class": "interactive",
+"via": "CreateStandardIconControl"
+},
+"CreateStaticHatch": {
+"class": "safe",
+"via": "CreateStaticHatch"
+},
+"CreateStaticHatchFromObject": {
+"class": "safe",
+"via": "CreateStaticHatchFromObject"
+},
+"CreateStaticText": {
+"class": "interactive",
+"via": "CreateStaticText"
+},
+"CreateStory": {
+"class": "safe",
+"via": "CreateStory"
+},
+"CreateStoryLayerTemplate": {
+"class": "safe",
+"via": "CreateStoryLayerTemplate"
+},
+"CreateSurfacefromCurvesNetwork": {
+"class": "safe",
+"via": "CreateSurfacefromCurvesNetwork"
+},
+"CreateSwapControl": {
+"class": "interactive",
+"via": "CreateSwapControl"
+},
+"CreateSwapPane": {
+"class": "interactive",
+"via": "CreateSwapPane"
+},
+"CreateTabControl": {
+"class": "interactive",
+"via": "CreateTabControl"
+},
+"CreateTabPane": {
+"class": "interactive",
+"via": "CreateTabPane"
+},
+"CreateTaperedExtrude": {
+"class": "safe",
+"via": "CreateTaperedExtrude"
+},
+"CreateTextBlock": {
+"class": "safe",
+"via": "CreateText"
+},
+"CreateTexture": {
+"class": "safe",
+"via": "CreateTexture"
+},
+"CreateTextureBitmap": {
+"class": "safe",
+"via": "CreateTextureBitmap"
+},
+"CreateThreeStateCheckBox": {
+"class": "interactive",
+"via": "CreateThreeStateCheckBox"
+},
+"CreateThumbnailPopup": {
+"class": "interactive",
+"via": "CreateThumbnailPopup"
+},
+"CreateTile": {
+"class": "safe",
+"via": "CreateTile"
+},
+"CreateTrapeziumDormer": {
+"class": "safe",
+"via": "CreateTrapeziumDormer"
+},
+"CreateTreeControl": {
+"class": "interactive",
+"via": "CreateTreeControl"
+},
+"CreateViewport": {
+"class": "safe",
+"via": "CreateVP"
+},
+"CreateWallStyle": {
+"class": "safe",
+"via": "CreateWallStyle"
+},
+"CreateWorksheet": {
+"class": "safe",
+"via": "CreateWS"
+},
+"DeleteAllDLComponents": {
+"class": "safe",
+"via": "DeleteAllDLComponents"
+},
+"DeleteAllItems": {
+"class": "interactive",
+"via": "DeleteAllItems"
+},
+"DeleteClass": {
+"class": "safe",
+"via": "DelClass"
+},
+"DeleteComponent": {
+"class": "safe",
+"via": "DeleteComponent"
+},
+"DeleteConstraint": {
+"class": "safe",
+"via": "DeleteConstraint"
+},
+"DeleteDLComponent": {
+"class": "safe",
+"via": "DeleteDLComponent"
+},
+"DeleteObject": {
+"class": "safe",
+"via": "DelObject"
+},
+"DeleteResourceFromList": {
+"class": "safe",
+"via": "DeleteResourceFromList"
+},
+"DeleteStoryLayerTemplate": {
+"class": "safe",
+"via": "DeleteStoryLayerTemplate"
+},
+"DeleteSymbolDefinition": {
+"class": "safe",
+"via": "DeleteSymbolDefinition"
+},
+"DeleteTextureSpace": {
+"class": "safe",
+"via": "DeleteTextureSpace"
+},
+"DeleteVertex": {
+"class": "safe",
+"via": "DelVertex"
+},
+"DeregisterDialogFromTimerEvents": {
+"class": "interactive",
+"via": "DeregisterDialogFromTimerEvents"
+},
+"DeselectAll": {
+"class": "safe",
+"via": "DSelectAll"
+},
+"DeselectEditText": {
+"class": "interactive",
+"via": "DeselectEditText"
+},
+"DisableModules": {
+"class": "safe",
+"via": "DisableModules"
+},
+"DisplayContextHelpOfCurrentPlugin": {
+"class": "crasher",
+"via": "DisplayContextHelpOfCurrentPlugin"
+},
+"DisplayContextualHelp": {
+"class": "safe",
+"via": "DisplayContextualHelp"
+},
+"DisplayOrganizationDialog": {
+"class": "crasher",
+"via": "DisplayOrganizationDialog"
+},
+"DisplaySwapPane": {
+"class": "interactive",
+"via": "DisplaySwapPane"
+},
+"DisplayTabPane": {
+"class": "interactive",
+"via": "DisplayTabPane"
+},
+"DrawNurbsObject": {
+"class": "safe",
+"via": "DrawNurbsObject"
+},
+"EditShaderRecord": {
+"class": "safe",
+"via": "EditShaderRecord"
+},
+"EditTexture": {
+"class": "safe",
+"via": "EditTexture"
+},
+"EditTextureSpace": {
+"class": "safe",
+"via": "EditTextureSpace"
+},
+"EnableDrawingWorksheetPalette": {
+"class": "safe",
+"via": "EnableDrawingWorksheetPalette"
+},
+"EnableDropShadow": {
+"class": "safe",
+"via": "EnableDropShadow"
+},
+"EnableItem": {
+"class": "interactive",
+"via": "EnableItem"
+},
+"EnableParameter": {
+"class": "safe",
+"via": "EnableParameter"
+},
+"EndMultipleDuplicate": {
+"class": "safe",
+"via": "EndMultipleDuplicate"
+},
+"EvaluateNurbsSurfacePointAndNormal": {
+"class": "safe",
+"via": "EvaluateNurbsSurfacePointAndNormal"
+},
+"ExpandTreeControlItem": {
+"class": "interactive",
+"via": "ExpandTreeControlItem"
+},
+"ExtendNurbsCurve": {
+"class": "safe",
+"via": "ExtendNurbsCurve"
+},
+"ExtendNurbsSurface": {
+"class": "safe",
+"via": "ExtendNurbsSurface"
+},
+"Get2DPt": {
+"class": "safe",
+"via": "Get2DPt"
+},
+"GetActiveEditItem": {
+"class": "interactive",
+"via": "GetActiveEditItem"
+},
+"GetActivePane": {
+"class": "interactive",
+"via": "GetActivePane"
+},
+"GetActiveSerialNumber": {
+"class": "safe",
+"via": "GetActiveSerialNumber"
+},
+"GetActualNameFromResourceList": {
+"class": "safe",
+"via": "GetActualNameFromResourceList"
+},
+"GetAssociation": {
+"class": "safe",
+"via": "GetAssociation"
+},
+"GetBatAttributes": {
+"class": "safe",
+"via": "GetBatAttributes"
+},
+"GetBinaryConstraint": {
+"class": "safe",
+"via": "GetBinaryConstraint"
+},
+"GetBooleanItem": {
+"class": "interactive",
+"via": "GetBooleanItem"
+},
+"GetCallBackInval": {
+"class": "safe",
+"via": "GetCallBackInval"
+},
+"GetCheckoutsComment": {
+"class": "safe",
+"via": "GetCheckoutsComment"
+},
+"GetChoiceCount": {
+"class": "interactive",
+"via": "GetChoiceCount"
+},
+"GetChoiceIndex": {
+"class": "interactive",
+"via": "GetChoiceIndex"
+},
+"GetChoiceText": {
+"class": "interactive",
+"via": "GetChoiceText"
+},
+"GetClTextStyleRef": {
+"class": "safe",
+"via": "GetClTextStyleRef"
+},
+"GetClUseGraphic": {
+"class": "safe",
+"via": "GetClUseGraphic"
+},
+"GetClUseTextStyle": {
+"class": "safe",
+"via": "GetClUseTextStyle"
+},
+"GetClUseTexture": {
+"class": "safe",
+"via": "GetClUseTexture"
+},
+"GetClassByStyle": {
+"class": "safe",
+"via": "GetClassByStyle"
+},
+"GetClosestSide": {
+"class": "safe",
+"via": "GetClosestSide"
+},
+"GetColorChoice": {
+"class": "interactive",
+"via": "GetColorChoice"
+},
+"GetColorName": {
+"class": "safe",
+"via": "GetColorName"
+},
+"GetComponentClass": {
+"class": "safe",
+"via": "GetComponentClass"
+},
+"GetComponentFill": {
+"class": "safe",
+"via": "GetComponentFill"
+},
+"GetComponentFillColors": {
+"class": "safe",
+"via": "GetComponentFillColors"
+},
+"GetComponentFollowBottomWallPeaks": {
+"class": "safe",
+"via": "GetComponentFollowBottomWallPeaks"
+},
+"GetComponentFollowTopWallPeaks": {
+"class": "safe",
+"via": "GetComponentFollowTopWallPeaks"
+},
+"GetComponentManualEdgeOffset": {
+"class": "safe",
+"via": "GetComponentManualEdgeOffset"
+},
+"GetComponentMaterial": {
+"class": "safe",
+"via": "GetComponentMaterial"
+},
+"GetComponentName": {
+"class": "safe",
+"via": "GetComponentName"
+},
+"GetComponentNetArea": {
+"class": "safe",
+"via": "GetComponentNetArea"
+},
+"GetComponentNetVolume": {
+"class": "safe",
+"via": "GetComponentNetVolume"
+},
+"GetComponentPenColors": {
+"class": "safe",
+"via": "GetComponentPenColors"
+},
+"GetComponentPenWeights": {
+"class": "safe",
+"via": "GetComponentPenWeights"
+},
+"GetComponentTextWidth": {
+"class": "interactive",
+"via": "GetComponentTextWidth"
+},
+"GetComponentTexture": {
+"class": "safe",
+"via": "GetComponentTexture"
+},
+"GetComponentUseFillClassAttr": {
+"class": "safe",
+"via": "GetComponentUseFillClassAttr"
+},
+"GetComponentUsePenClassAttr": {
+"class": "safe",
+"via": "GetComponentUsePenClassAttr"
+},
+"GetComponentWidth": {
+"class": "safe",
+"via": "GetComponentWidth"
+},
+"GetCoreWallComponent": {
+"class": "safe",
+"via": "GetCoreWallComponent"
+},
+"GetCurrentLocalization": {
+"class": "safe",
+"via": "GetCurrentLocalization"
+},
+"GetCurrentMode": {
+"class": "safe",
+"via": "GetCurrentMode"
+},
+"GetCurrentUserId": {
+"class": "safe",
+"via": "GetCurrentUserId"
+},
+"GetCustomObjectColor": {
+"class": "safe",
+"via": "GetCustomObjectColor"
+},
+"GetCustomObjectProfileGroup": {
+"class": "safe",
+"via": "GetCustomObjectProfileGroup"
+},
+"GetCustomObjectSelectionGroup": {
+"class": "safe",
+"via": "GetCustomObjectSelectionGroup"
+},
+"GetDLComponentClass": {
+"class": "safe",
+"via": "GetDLComponentClass"
+},
+"GetDLComponentFill": {
+"class": "safe",
+"via": "GetDLComponentFill"
+},
+"GetDLComponentFillColors": {
+"class": "safe",
+"via": "GetDLComponentFillColors"
+},
+"GetDLComponentName": {
+"class": "safe",
+"via": "GetDLComponentName"
+},
+"GetDLComponentPenColors": {
+"class": "safe",
+"via": "GetDLComponentPenColors"
+},
+"GetDLComponentPenWeights": {
+"class": "safe",
+"via": "GetDLComponentPenWeights"
+},
+"GetDLComponentUseFillClassAttr": {
+"class": "safe",
+"via": "GetDLComponentUseFillClassAttr"
+},
+"GetDLComponentUsePenClassAttr": {
+"class": "safe",
+"via": "GetDLComponentUsePenClassAttr"
+},
+"GetDLComponentWidth": {
+"class": "safe",
+"via": "GetDLComponentWidth"
+},
+"GetDLControlOffset": {
+"class": "safe",
+"via": "GetDLControlOffset"
+},
+"GetDLOptions": {
+"class": "safe",
+"via": "GetDLOptions"
+},
+"GetDLSeparation": {
+"class": "safe",
+"via": "GetDLSeparation"
+},
+"GetDashLineTypeName": {
+"class": "safe",
+"via": "GetDashLineTypeName"
+},
+"GetDatumSlabComponent": {
+"class": "safe",
+"via": "GetDatumSlabComponent"
+},
+"GetDescriptionText": {
+"class": "safe",
+"via": "GetDescriptionText"
+},
+"GetDocumentDefaultSketchStyle": {
+"class": "safe",
+"via": "GetDocumentDefaultSketchStyle"
+},
+"GetDormerAttributes": {
+"class": "safe",
+"via": "GetDormerAttributes"
+},
+"GetEditInteger": {
+"class": "interactive",
+"via": "GetEditInteger"
+},
+"GetEditReal": {
+"class": "interactive",
+"via": "GetEditReal"
+},
+"GetEnabledModules": {
+"class": "safe",
+"via": "GetEnabledModules"
+},
+"GetFillIAxisEndPoint": {
+"class": "safe",
+"via": "GetFillIAxisEndPoint"
+},
+"GetFillJAxisEndPoint": {
+"class": "safe",
+"via": "GetFillJAxisEndPoint"
+},
+"GetFillOriginPoint": {
+"class": "safe",
+"via": "GetFillOriginPoint"
+},
+"GetFillPat": {
+"class": "safe",
+"via": "GetFPat"
+},
+"GetFillPoints": {
+"class": "safe",
+"via": "GetFillPoints"
+},
+"GetFillSpace": {
+"class": "safe",
+"via": "GetFillSpace"
+},
+"GetGableAttributes": {
+"class": "safe",
+"via": "GetGableAttributes"
+},
+"GetGradientData": {
+"class": "safe",
+"via": "GetGradientData"
+},
+"GetGradientMidpointPosition": {
+"class": "safe",
+"via": "GetGradientMidpointPosition"
+},
+"GetGradientSliderData": {
+"class": "interactive",
+"via": "GetGradientSliderData"
+},
+"GetGradientSliderSelectedMarker": {
+"class": "interactive",
+"via": "GetGradientSliderSelectedMarker"
+},
+"GetGradientSpotColor": {
+"class": "safe",
+"via": "GetGradientSpotColor"
+},
+"GetGradientSpotPosition": {
+"class": "safe",
+"via": "GetGradientSpotPosition"
+},
+"GetHipAttributes": {
+"class": "safe",
+"via": "GetHipAttributes"
+},
+"GetIconPushButtonState": {
+"class": "interactive",
+"via": "GetIconPushButtonState"
+},
+"GetImageCropObject": {
+"class": "safe",
+"via": "GetImageCropObject"
+},
+"GetImagePopupObject": {
+"class": "interactive",
+"via": "GetImagePopupObject"
+},
+"GetImagePopupObjectItemIndex": {
+"class": "interactive",
+"via": "GetImagePopupObjectItemIndex"
+},
+"GetImagePopupSelectedItem": {
+"class": "interactive",
+"via": "GetImagePopupSelectedItem"
+},
+"GetItemText": {
+"class": "interactive",
+"via": "GetItemText"
+},
+"GetLayerCutPlane": {
+"class": "safe",
+"via": "GetLayerCutPlane"
+},
+"GetLayerForStory": {
+"class": "safe",
+"via": "GetLayerForStory"
+},
+"GetLayerLevelType": {
+"class": "safe",
+"via": "GetLayerLevelType"
+},
+"GetLayoutDialogPosition": {
+"class": "interactive",
+"via": "GetLayoutDialogPosition"
+},
+"GetLayoutDialogSize": {
+"class": "interactive",
+"via": "GetLayoutDialogSize"
+},
+"GetLineTypeAtIndex": {
+"class": "interactive",
+"via": "GetLineTypeAtIndex"
+},
+"GetLineTypeChoice": {
+"class": "interactive",
+"via": "GetLineTypeChoice"
+},
+"GetLineWeight": {
+"class": "safe",
+"via": "GetLW"
+},
+"GetLineWeightChoice": {
+"class": "interactive",
+"via": "GetLineWeightChoice"
+},
+"GetLocalizedPluginChoice": {
+"class": "safe",
+"via": "GetLocalizedPluginChoice"
+},
+"GetLocalizedPluginName": {
+"class": "safe",
+"via": "GetLocalizedPluginName"
+},
+"GetLocalizedPluginParameter": {
+"class": "safe",
+"via": "GetLocalizedPluginParameter"
+},
+"GetMaterialArea": {
+"class": "safe",
+"via": "GetMaterialArea"
+},
+"GetMaterialFillStyle": {
+"class": "safe",
+"via": "GetMaterialFillStyle"
+},
+"GetMaterialTexture": {
+"class": "safe",
+"via": "GetMaterialTexture"
+},
+"GetMaterialVolume": {
+"class": "safe",
+"via": "GetMaterialVolume"
+},
+"GetModifierFlags": {
+"class": "safe",
+"via": "GetModifierFlags"
+},
+"GetNameFromResourceList": {
+"class": "safe",
+"via": "GetNameFromResourceList"
+},
+"GetNamedObject": {
+"class": "safe",
+"via": "GetObject"
+},
+"GetNumAssociations": {
+"class": "safe",
+"via": "GetNumAssociations"
+},
+"GetNumGradientSegments": {
+"class": "safe",
+"via": "GetNumGradientSegments"
+},
+"GetNumGradientSliderSegments": {
+"class": "interactive",
+"via": "GetNumGradientSliderSegments"
+},
+"GetNumImagePopupItems": {
+"class": "interactive",
+"via": "GetNumImagePopupItems"
+},
+"GetNumLayerLevelTypes": {
+"class": "safe",
+"via": "GetNumLayerLevelTypes"
+},
+"GetNumRoofElements": {
+"class": "safe",
+"via": "GetNumRoofElements"
+},
+"GetNumStories": {
+"class": "safe",
+"via": "GetNumStories"
+},
+"GetNumStoryLayerTemplates": {
+"class": "safe",
+"via": "GetNumStoryLayerTemplates"
+},
+"GetNumberOfComponents": {
+"class": "safe",
+"via": "GetNumberOfComponents"
+},
+"GetNumberOfDLComponents": {
+"class": "safe",
+"via": "GetNumberOfDLComponents"
+},
+"GetNurbsObjectDistanceFromPoint": {
+"class": "safe",
+"via": "GetNurbsObjectDistanceFromPoint"
+},
+"GetObjTypeProperties": {
+"class": "safe",
+"via": "GetObjTypeProperties"
+},
+"GetObjectByUuid": {
+"class": "safe",
+"via": "GetObjectByUuid"
+},
+"GetObjectClass": {
+"class": "safe",
+"via": "GetClass"
+},
+"GetObjectHiddenLine": {
+"class": "safe",
+"via": "GetObjectHiddenLine"
+},
+"GetObjectName": {
+"class": "safe",
+"via": "GetName"
+},
+"GetObjectUuid": {
+"class": "safe",
+"via": "GetObjectUuid"
+},
+"GetObjectWallHeight": {
+"class": "safe",
+"via": "GetObjectWallHeight"
+},
+"GetObjectWallOffset": {
+"class": "safe",
+"via": "GetObjectWallOffset"
+},
+"GetOpacityByClass": {
+"class": "safe",
+"via": "GetOpacityByClass"
+},
+"GetOpacityByClassN": {
+"class": "safe",
+"via": "GetOpacityByClassN"
+},
+"GetParameterOnNurbsCurve": {
+"class": "safe",
+"via": "GetParameterOnNurbsCurve"
+},
+"GetPartDataID": {
+"class": "safe",
+"via": "GetPartDataID"
+},
+"GetPartTypeName": {
+"class": "safe",
+"via": "GetPartTypeName"
+},
+"GetPatternData": {
+"class": "interactive",
+"via": "GetPatternData"
+},
+"GetPointAndParameterOnNurbsCurveAtGivenLength": {
+"class": "safe",
+"via": "GetPointAndParameterOnNurbsCurveAtGivenLength"
+},
+"GetProduct": {
+"class": "interactive",
+"via": "GetProduct"
+},
+"GetProjectName": {
+"class": "safe",
+"via": "GetProjectName"
+},
+"GetProjection": {
+"class": "safe",
+"via": "GetProjection"
+},
+"GetResourceFromList": {
+"class": "safe",
+"via": "GetResourceFromList"
+},
+"GetRoofAttributes": {
+"class": "safe",
+"via": "GetRoofAttributes"
+},
+"GetRoofEdge": {
+"class": "safe",
+"via": "GetRoofEdge"
+},
+"GetRoofElementType": {
+"class": "safe",
+"via": "GetRoofElementType"
+},
+"GetRoofPreferences": {
+"class": "safe",
+"via": "GetRoofPreferences"
+},
+"GetRoofStyle": {
+"class": "safe",
+"via": "GetRoofStyle"
+},
+"GetScriptResource": {
+"class": "safe",
+"via": "GetScriptResource"
+},
+"GetSelectedChoiceIndex": {
+"class": "interactive",
+"via": "GetSelectedChoiceIndex"
+},
+"GetSelectionRange": {
+"class": "interactive",
+"via": "GetSelectionRange"
+},
+"GetShaderRecord": {
+"class": "safe",
+"via": "GetShaderRecord"
+},
+"GetShedAttributes": {
+"class": "safe",
+"via": "GetShedAttributes"
+},
+"GetSheetLayerUserOrigin": {
+"class": "safe",
+"via": "GetSheetLayerUserOrigin"
+},
+"GetSingularConstraint": {
+"class": "safe",
+"via": "GetSingularConstraint"
+},
+"GetSkylight": {
+"class": "safe",
+"via": "GetSkylight"
+},
+"GetSlabHeight": {
+"class": "safe",
+"via": "GetSlabHeight"
+},
+"GetSlabPreferences": {
+"class": "safe",
+"via": "GetSlabPreferences"
+},
+"GetSlabPreferencesStyle": {
+"class": "safe",
+"via": "GetSlabPreferencesStyle"
+},
+"GetSlabStyle": {
+"class": "safe",
+"via": "GetSlabStyle"
+},
+"GetStoryAbove": {
+"class": "safe",
+"via": "GetStoryAbove"
+},
+"GetStoryBelow": {
+"class": "safe",
+"via": "GetStoryBelow"
+},
+"GetStoryElevation": {
+"class": "safe",
+"via": "GetStoryElevation"
+},
+"GetStoryLayerTemplateName": {
+"class": "safe",
+"via": "GetStoryLayerTemplateName"
+},
+"GetStoryOfLayer": {
+"class": "safe",
+"via": "GetStoryOfLayer"
+},
+"GetStorySuffix": {
+"class": "safe",
+"via": "GetStorySuffix"
+},
+"GetTaperedComponent": {
+"class": "safe",
+"via": "GetTaperedComponent"
+},
+"GetTextLength": {
+"class": "safe",
+"via": "GetTextLength"
+},
+"GetTextSize": {
+"class": "safe",
+"via": "GetTextSize"
+},
+"GetTextStyleRef": {
+"class": "safe",
+"via": "GetTextStyleRef"
+},
+"GetTextStyleRefN": {
+"class": "safe",
+"via": "GetTextStyleRefN"
+},
+"GetTextWidth": {
+"class": "safe",
+"via": "GetTextWidth"
+},
+"GetTextWrap": {
+"class": "safe",
+"via": "GetTextWrap"
+},
+"GetTextureRef": {
+"class": "safe",
+"via": "GetTextureRef"
+},
+"GetTextureRefN": {
+"class": "safe",
+"via": "GetTextureRefN"
+},
+"GetTextureSpace": {
+"class": "safe",
+"via": "GetTextureSpace"
+},
+"GetThreeStateCheckBoxState": {
+"class": "interactive",
+"via": "GetThreeStateCheckBoxState"
+},
+"GetTileBackgroundColor": {
+"class": "safe",
+"via": "GetTileBackgroundColor"
+},
+"GetTileGeometryGroup": {
+"class": "safe",
+"via": "GetTileGeometryGroup"
+},
+"GetTileGroupParent": {
+"class": "safe",
+"via": "GetTileGroupParent"
+},
+"GetTrapeziumAttributes": {
+"class": "safe",
+"via": "GetTrapeziumAttributes"
+},
+"GetTreeControlItemText": {
+"class": "interactive",
+"via": "GetTreeControlItemText"
+},
+"GetTreeControlSelectedItem": {
+"class": "interactive",
+"via": "GetTreeControlSelectedItem"
+},
+"GetUseWallClosure": {
+"class": "safe",
+"via": "GetUseWallClosure"
+},
+"GetViewCenter": {
+"class": "safe",
+"via": "GetVCenter"
+},
+"GetWallCaps": {
+"class": "safe",
+"via": "GetWallCaps"
+},
+"GetWallCapsOffsets": {
+"class": "safe",
+"via": "GetWallCapsOffsets"
+},
+"GetWallClosureGroup": {
+"class": "safe",
+"via": "GetWallClosureGroup"
+},
+"GetWallCornerHeights": {
+"class": "safe",
+"via": "GetWallCornerHeights"
+},
+"GetWallOverallHeights": {
+"class": "safe",
+"via": "GetWallOverallHeights"
+},
+"GetWallPrefStyle": {
+"class": "safe",
+"via": "GetWallPrefStyle"
+},
+"GetWallPreferences": {
+"class": "safe",
+"via": "GetWallPreferences"
+},
+"GetWallStyle": {
+"class": "safe",
+"via": "GetWallStyle"
+},
+"HasConstraint": {
+"class": "safe",
+"via": "HasConstraint"
+},
+"InsertEnhancedPullDownMenuItem": {
+"class": "interactive",
+"via": "InsertEnhancedPullDownMenuItem"
+},
+"InsertGradientSegment": {
+"class": "safe",
+"via": "InsertGradientSegment"
+},
+"InsertGradientSliderSegment": {
+"class": "interactive",
+"via": "InsertGradientSliderSegment"
+},
+"InsertImagePopupObjectItem": {
+"class": "interactive",
+"via": "InsertImagePopupObjectItem"
+},
+"InsertImagePopupResource": {
+"class": "interactive",
+"via": "InsertImagePopupResource"
+},
+"InsertImagePopupSeparator": {
+"class": "interactive",
+"via": "InsertImagePopupSeparator"
+},
+"InsertNewComponentN": {
+"class": "safe",
+"via": "InsertNewComponentN"
+},
+"InsertProposedClassOrLayerItem": {
+"class": "interactive",
+"via": "InsertProposedClassOrLayerItem"
+},
+"InsertTreeControlItem": {
+"class": "interactive",
+"via": "InsertTreeControlItem"
+},
+"IsCatalogParameter": {
+"class": "safe",
+"via": "IsCatalogParameter"
+},
+"IsClassChoiceSelected": {
+"class": "interactive",
+"via": "IsClassChoiceSelected"
+},
+"IsCurtainWall": {
+"class": "safe",
+"via": "IsCurtainWall"
+},
+"IsDropShadowEnabled": {
+"class": "safe",
+"via": "IsDropShadowEnabled"
+},
+"IsImageCropVisible": {
+"class": "safe",
+"via": "IsImageCropVisible"
+},
+"IsImageCropped": {
+"class": "safe",
+"via": "IsImageCropped"
+},
+"IsItemEnabled": {
+"class": "interactive",
+"via": "IsItemEnabled"
+},
+"IsItemVisible": {
+"class": "interactive",
+"via": "IsItemVisible"
+},
+"IsLocked": {
+"class": "safe",
+"via": "IsLocked"
+},
+"IsMaterialSimple": {
+"class": "safe",
+"via": "IsMaterialSimple"
+},
+"IsPluginFormat": {
+"class": "safe",
+"via": "IsPluginFormat"
+},
+"IsProjectOffline": {
+"class": "safe",
+"via": "IsProjectOffline"
+},
+"IsTileGroupContainedObject": {
+"class": "safe",
+"via": "IsTileGroupContainedObject"
+},
+"ModelPt2DToScreenPt": {
+"class": "safe",
+"via": "ModelPt2DToScreenPt"
+},
+"ModelVecToScreenVec": {
+"class": "safe",
+"via": "ModelVecToScreenVec"
+},
+"ModifySlab": {
+"class": "safe",
+"via": "ModifySlab"
+},
+"Moments3D": {
+"class": "safe",
+"via": "Moments3D"
+},
+"MoveObject": {
+"class": "safe",
+"via": "HMove"
+},
+"MoveWallByOffset": {
+"class": "safe",
+"via": "MoveWallByOffset"
+},
+"NameUndoEvent": {
+"class": "safe",
+"via": "NameUndoEvent"
+},
+"NonUndoableActionOK": {
+"class": "interactive",
+"via": "NonUndoableActionOK"
+},
+"NotifyPullDownClicked": {
+"class": "interactive",
+"via": "NotifyPullDownClicked"
+},
+"NumSelectedObjects": {
+"class": "safe",
+"via": "NumSelectedObjects"
+},
+"NurbsCurveGetNumPieces": {
+"class": "safe",
+"via": "NurbsCurveGetNumPieces"
+},
+"NurbsCurveType": {
+"class": "safe",
+"via": "NurbsCurveType"
+},
+"NurbsDegree": {
+"class": "safe",
+"via": "NurbsDegree"
+},
+"NurbsDelVertex": {
+"class": "safe",
+"via": "NurbsDelVertex"
+},
+"NurbsGetNumPts": {
+"class": "safe",
+"via": "NurbsGetNumPts"
+},
+"NurbsGetPt3D": {
+"class": "safe",
+"via": "NurbsGetPt3D"
+},
+"NurbsGetWeight": {
+"class": "safe",
+"via": "NurbsGetWeight"
+},
+"NurbsKnot": {
+"class": "safe",
+"via": "NurbsKnot"
+},
+"NurbsNumKnots": {
+"class": "safe",
+"via": "NurbsNumKnots"
+},
+"NurbsSetKnot": {
+"class": "safe",
+"via": "NurbsSetKnot"
+},
+"NurbsSetPt3D": {
+"class": "safe",
+"via": "NurbsSetPt3D"
+},
+"NurbsSetWeight": {
+"class": "safe",
+"via": "NurbsSetWeight"
+},
+"ObjArea": {
+"class": "safe",
+"via": "ObjArea"
+},
+"ObjSurfaceArea": {
+"class": "safe",
+"via": "ObjSurfaceArea"
+},
+"ObjVolume": {
+"class": "safe",
+"via": "ObjVolume"
+},
+"OffsetPolyClosed": {
+"class": "safe",
+"via": "OffsetPolyClosed"
+},
+"Products3D": {
+"class": "safe",
+"via": "Products3D"
+},
+"RefreshItem": {
+"class": "interactive",
+"via": "RefreshItem"
+},
+"RegisterDialogForTimerEvents": {
+"class": "interactive",
+"via": "RegisterDialogForTimerEvents"
+},
+"RemoveAllImagePopupItems": {
+"class": "interactive",
+"via": "RemoveAllImagePopupItems"
+},
+"RemoveChoice": {
+"class": "interactive",
+"via": "RemoveChoice"
+},
+"RemoveEnhancedPullDownMenuItemRange": {
+"class": "interactive",
+"via": "RemoveEnhancedPullDownMenuItemRange"
+},
+"RemoveGradientSegment": {
+"class": "safe",
+"via": "RemoveGradientSegment"
+},
+"RemoveGradientSliderSegment": {
+"class": "interactive",
+"via": "RemoveGradientSliderSegment"
+},
+"RemoveImagePopupItem": {
+"class": "interactive",
+"via": "RemoveImagePopupItem"
+},
+"RemoveListBoxTabStop": {
+"class": "interactive",
+"via": "RemoveListBoxTabStop"
+},
+"RemovePartTag": {
+"class": "safe",
+"via": "RemovePartTag"
+},
+"RemoveRoofEdge": {
+"class": "safe",
+"via": "RemoveRoofEdge"
+},
+"RemoveRoofElement": {
+"class": "safe",
+"via": "RemoveRoofElement"
+},
+"RemoveStoryLevel": {
+"class": "safe",
+"via": "RemoveStoryLevel"
+},
+"RemoveTreeControlItem": {
+"class": "interactive",
+"via": "RemoveTreeControlItem"
+},
+"ResetObject": {
+"class": "safe",
+"via": "ResetObject"
+},
+"ResourceListSize": {
+"class": "safe",
+"via": "ResourceListSize"
+},
+"ReverseWallSides": {
+"class": "safe",
+"via": "ReverseWallSides"
+},
+"RevolveWithRail": {
+"class": "safe",
+"via": "RevolveWithRail"
+},
+"ScreenPtToModelPt2D": {
+"class": "safe",
+"via": "ScreenPtToModelPt2D"
+},
+"ScreenVecToModelVec": {
+"class": "safe",
+"via": "ScreenVecToModelVec"
+},
+"SelectAll": {
+"class": "safe",
+"via": "SelectAll"
+},
+"SelectChoice": {
+"class": "interactive",
+"via": "SelectChoice"
+},
+"SelectClassChoice": {
+"class": "interactive",
+"via": "SelectClassChoice"
+},
+"SelectEditText": {
+"class": "interactive",
+"via": "SelectEditText"
+},
+"SelectPluginCatalog": {
+"class": "safe",
+"via": "SelectPluginCatalog"
+},
+"SelectTreeControlItem": {
+"class": "interactive",
+"via": "SelectTreeControlItem"
+},
+"SetArc": {
+"class": "safe",
+"via": "SetArc"
+},
+"SetBatAttributes": {
+"class": "safe",
+"via": "SetBatAttributes"
+},
+"SetBelowItem": {
+"class": "interactive",
+"via": "SetBelowItem"
+},
+"SetBinaryConstraint": {
+"class": "interactive",
+"via": "SetBinaryConstraint"
+},
+"SetBooleanItem": {
+"class": "interactive",
+"via": "SetBooleanItem"
+},
+"SetCallBackInval": {
+"class": "safe",
+"via": "SetCallBackInval"
+},
+"SetClTextStyleRef": {
+"class": "safe",
+"via": "SetClTextStyleRef"
+},
+"SetClUseGraphic": {
+"class": "safe",
+"via": "SetClUseGraphic"
+},
+"SetClUseTextStyle": {
+"class": "safe",
+"via": "SetClUseTextStyle"
+},
+"SetClUseTexture": {
+"class": "safe",
+"via": "SetClUseTexture"
+},
+"SetClassByStyle": {
+"class": "safe",
+"via": "SetClassByStyle"
+},
+"SetColorChoice": {
+"class": "interactive",
+"via": "SetColorChoice"
+},
+"SetColorName": {
+"class": "safe",
+"via": "SetColorName"
+},
+"SetComponentClass": {
+"class": "safe",
+"via": "SetComponentClass"
+},
+"SetComponentFill": {
+"class": "safe",
+"via": "SetComponentFill"
+},
+"SetComponentFillColors": {
+"class": "safe",
+"via": "SetComponentFillColors"
+},
+"SetComponentFollowBottomWallPeaks": {
+"class": "safe",
+"via": "SetComponentFollowBottomWallPeaks"
+},
+"SetComponentFollowTopWallPeaks": {
+"class": "safe",
+"via": "SetComponentFollowTopWallPeaks"
+},
+"SetComponentIndeterminate": {
+"class": "interactive",
+"via": "SetComponentIndeterminate"
+},
+"SetComponentManualEdgeOffset": {
+"class": "safe",
+"via": "SetComponentManualEdgeOffset"
+},
+"SetComponentMaterial": {
+"class": "safe",
+"via": "SetComponentMaterial"
+},
+"SetComponentName": {
+"class": "safe",
+"via": "SetComponentName"
+},
+"SetComponentPenColors": {
+"class": "safe",
+"via": "SetComponentPenColors"
+},
+"SetComponentPenWeights": {
+"class": "safe",
+"via": "SetComponentPenWeights"
+},
+"SetComponentSize": {
+"class": "interactive",
+"via": "SetComponentSize"
+},
+"SetComponentTexture": {
+"class": "safe",
+"via": "SetComponentTexture"
+},
+"SetComponentUseFillClassAttr": {
+"class": "safe",
+"via": "SetComponentUseFillClassAttr"
+},
+"SetComponentUsePenClassAttr": {
+"class": "safe",
+"via": "SetComponentUsePenClassAttr"
+},
+"SetComponentWidth": {
+"class": "safe",
+"via": "SetComponentWidth"
+},
+"SetConstraintValue": {
+"class": "crasher",
+"via": "SetConstraintValue"
+},
+"SetCoreWallComponent": {
+"class": "safe",
+"via": "SetCoreWallComponent"
+},
+"SetCustomObjectColor": {
+"class": "safe",
+"via": "SetCustomObjectColor"
+},
+"SetCustomObjectProfileGroup": {
+"class": "safe",
+"via": "SetCustomObjectProfileGroup"
+},
+"SetCustomObjectSelectionGroup": {
+"class": "safe",
+"via": "SetCustomObjectSelectionGroup"
+},
+"SetCustomObjectWallHoleGroup": {
+"class": "safe",
+"via": "SetCustomObjectWallHoleGroup"
+},
+"SetDLComponentClass": {
+"class": "safe",
+"via": "SetDLComponentClass"
+},
+"SetDLComponentFill": {
+"class": "safe",
+"via": "SetDLComponentFill"
+},
+"SetDLComponentFillColors": {
+"class": "safe",
+"via": "SetDLComponentFillColors"
+},
+"SetDLComponentName": {
+"class": "safe",
+"via": "SetDLComponentName"
+},
+"SetDLComponentPenColors": {
+"class": "safe",
+"via": "SetDLComponentPenColors"
+},
+"SetDLComponentPenWeights": {
+"class": "safe",
+"via": "SetDLComponentPenWeights"
+},
+"SetDLComponentUseFillClassAttr": {
+"class": "safe",
+"via": "SetDLComponentUseFillClassAttr"
+},
+"SetDLComponentUsePenClassAttr": {
+"class": "safe",
+"via": "SetDLComponentUsePenClassAttr"
+},
+"SetDLComponentWidth": {
+"class": "safe",
+"via": "SetDLComponentWidth"
+},
+"SetDLControlOffset": {
+"class": "safe",
+"via": "SetDLControlOffset"
+},
+"SetDLOptions": {
+"class": "safe",
+"via": "SetDLOptions"
+},
+"SetDLSeparation": {
+"class": "safe",
+"via": "SetDLSeparation"
+},
+"SetDashLineTypeName": {
+"class": "safe",
+"via": "SetDashLineTypeName"
+},
+"SetDatumSlabComponent": {
+"class": "safe",
+"via": "SetDatumSlabComponent"
+},
+"SetDefaultOpacityByClass": {
+"class": "safe",
+"via": "SetDefaultOpacityByClass"
+},
+"SetDefaultTextureSpace": {
+"class": "safe",
+"via": "SetDefaultTextureSpace"
+},
+"SetDescriptionText": {
+"class": "safe",
+"via": "SetDescriptionText"
+},
+"SetDocumentDefaultSketchStyle": {
+"class": "safe",
+"via": "SetDocumentDefaultSketchStyle"
+},
+"SetDormerAttributes": {
+"class": "safe",
+"via": "SetDormerAttributes"
+},
+"SetDormerThick": {
+"class": "safe",
+"via": "SetDormerThick"
+},
+"SetEdgeBinding": {
+"class": "interactive",
+"via": "SetEdgeBinding"
+},
+"SetEditInteger": {
+"class": "interactive",
+"via": "SetEditInteger"
+},
+"SetEditReal": {
+"class": "interactive",
+"via": "SetEditReal"
+},
+"SetFPatByClass": {
+"class": "safe",
+"via": "SetFPatByClass"
+},
+"SetFillIAxisEndPoint": {
+"class": "safe",
+"via": "SetFillIAxisEndPoint"
+},
+"SetFillJAxisEndPoint": {
+"class": "safe",
+"via": "SetFillJAxisEndPoint"
+},
+"SetFillOriginPoint": {
+"class": "safe",
+"via": "SetFillOriginPoint"
+},
+"SetFillPat": {
+"class": "safe",
+"via": "SetFPat"
+},
+"SetFirstGroupItem": {
+"class": "interactive",
+"via": "SetFirstGroupItem"
+},
+"SetFirstLayoutItem": {
+"class": "interactive",
+"via": "SetFirstLayoutItem"
+},
+"SetFocusOnItem": {
+"class": "interactive",
+"via": "SetFocusOnItem"
+},
+"SetGableAttributes": {
+"class": "safe",
+"via": "SetGableAttributes"
+},
+"SetGradientData": {
+"class": "safe",
+"via": "SetGradientData"
+},
+"SetGradientMidpointPosition": {
+"class": "safe",
+"via": "SetGradientMidpointPosition"
+},
+"SetGradientSliderData": {
+"class": "interactive",
+"via": "SetGradientSliderData"
+},
+"SetGradientSliderSelectedMarker": {
+"class": "interactive",
+"via": "SetGradientSliderSelectedMarker"
+},
+"SetGradientSpotColor": {
+"class": "safe",
+"via": "SetGradientSpotColor"
+},
+"SetGradientSpotPosition": {
+"class": "safe",
+"via": "SetGradientSpotPosition"
+},
+"SetHelpText": {
+"class": "interactive",
+"via": "SetHelpText"
+},
+"SetHipAttributes": {
+"class": "safe",
+"via": "SetHipAttributes"
+},
+"SetIconPushButtonState": {
+"class": "interactive",
+"via": "SetIconPushButtonState"
+},
+"SetImageControlHandle": {
+"class": "interactive",
+"via": "SetImageControlHandle"
+},
+"SetImageControlPath": {
+"class": "interactive",
+"via": "SetImageControlPath"
+},
+"SetImageCropObject": {
+"class": "safe",
+"via": "SetImageCropObject"
+},
+"SetImageCropVisible": {
+"class": "safe",
+"via": "SetImageCropVisible"
+},
+"SetImagePopupSelectedItem": {
+"class": "interactive",
+"via": "SetImagePopupSelectedItem"
+},
+"SetIsCurtainWall": {
+"class": "safe",
+"via": "SetIsCurtainWall"
+},
+"SetItemClickable": {
+"class": "interactive",
+"via": "SetItemClickable"
+},
+"SetItemText": {
+"class": "interactive",
+"via": "SetItemText"
+},
+"SetItemToolTipText": {
+"class": "interactive",
+"via": "SetItemToolTipText"
+},
+"SetLWByClass": {
+"class": "safe",
+"via": "SetLWByClass"
+},
+"SetLayerCutPlane": {
+"class": "safe",
+"via": "SetLayerCutPlane"
+},
+"SetLayerLevelType": {
+"class": "safe",
+"via": "SetLayerLevelType"
+},
+"SetLayoutDialogPosition": {
+"class": "interactive",
+"via": "SetLayoutDialogPosition"
+},
+"SetLayoutDialogSize": {
+"class": "interactive",
+"via": "SetLayoutDialogSize"
+},
+"SetLayoutOption": {
+"class": "interactive",
+"via": "SetLayoutOption"
+},
+"SetLineTypeChoice": {
+"class": "interactive",
+"via": "SetLineTypeChoice"
+},
+"SetLineWeight": {
+"class": "safe",
+"via": "SetLW"
+},
+"SetLineWeightChoice": {
+"class": "interactive",
+"via": "SetLineWeightChoice"
+},
+"SetMaterialFillStyle": {
+"class": "safe",
+"via": "SetMaterialFillStyle"
+},
+"SetMaterialTexture": {
+"class": "safe",
+"via": "SetMaterialTexture"
+},
+"SetObjectAsCornerBreak": {
+"class": "safe",
+"via": "SetObjectAsCornerBreak"
+},
+"SetObjectClass": {
+"class": "safe",
+"via": "SetClass"
+},
+"SetObjectWallHeight": {
+"class": "safe",
+"via": "SetObjectWallHeight"
+},
+"SetObjectWallOffset": {
+"class": "safe",
+"via": "SetObjectWallOffset"
+},
+"SetOpacityByClass": {
+"class": "safe",
+"via": "SetOpacityByClass"
+},
+"SetOpacityByClassN": {
+"class": "safe",
+"via": "SetOpacityByClassN"
+},
+"SetParameterVisibility": {
+"class": "safe",
+"via": "SetParameterVisibility"
+},
+"SetPartDataID": {
+"class": "safe",
+"via": "SetPartDataID"
+},
+"SetPatternData": {
+"class": "interactive",
+"via": "SetPatternData"
+},
+"SetPlanarRefIDToGround": {
+"class": "safe",
+"via": "SetPlanarRefIDToGround"
+},
+"SetProjection": {
+"class": "safe",
+"via": "Projection"
+},
+"SetProportionalBinding": {
+"class": "interactive",
+"via": "SetProportionalBinding"
+},
+"SetRightItem": {
+"class": "interactive",
+"via": "SetRightItem"
+},
+"SetRoofAttributes": {
+"class": "safe",
+"via": "SetRoofAttributes"
+},
+"SetRoofEdge": {
+"class": "interactive",
+"via": "SetRoofEdge"
+},
+"SetRoofStyle": {
+"class": "safe",
+"via": "SetRoofStyle"
+},
+"SetScriptResource": {
+"class": "safe",
+"via": "SetScriptResource"
+},
+"SetSelectionRange": {
+"class": "interactive",
+"via": "SetSelectionRange"
+},
+"SetShedAttributes": {
+"class": "safe",
+"via": "SetShedAttributes"
+},
+"SetSheetLayerUserOrigin": {
+"class": "safe",
+"via": "SetSheetLayerUserOrigin"
+},
+"SetSingularConstraint": {
+"class": "interactive",
+"via": "SetSingularConstraint"
+},
+"SetSkylight": {
+"class": "safe",
+"via": "SetSkylight"
+},
+"SetSlabHeight": {
+"class": "safe",
+"via": "SetSlabHeight"
+},
+"SetSlabPreferencesStyle": {
+"class": "safe",
+"via": "SetSlabPreferencesStyle"
+},
+"SetSlabStyle": {
+"class": "safe",
+"via": "SetSlabStyle"
+},
+"SetSliderLiveUpdate": {
+"class": "interactive",
+"via": "SetSliderLiveUpdate"
+},
+"SetStaticTextColor": {
+"class": "interactive",
+"via": "SetStaticTextColor"
+},
+"SetStaticTextStyle": {
+"class": "interactive",
+"via": "SetStaticTextStyle"
+},
+"SetStoryElevation": {
+"class": "safe",
+"via": "SetStoryElevation"
+},
+"SetStorySuffix": {
+"class": "safe",
+"via": "SetStorySuffix"
+},
+"SetTaperedComponent": {
+"class": "safe",
+"via": "SetTaperedComponent"
+},
+"SetTextAdorner": {
+"class": "safe",
+"via": "SetTextAdorner"
+},
+"SetTextSize": {
+"class": "safe",
+"via": "SetTextSize"
+},
+"SetTextStyleByClass": {
+"class": "safe",
+"via": "SetTextStyleByClass"
+},
+"SetTextStyleByClassN": {
+"class": "safe",
+"via": "SetTextStyleByClassN"
+},
+"SetTextStyleRef": {
+"class": "safe",
+"via": "SetTextStyleRef"
+},
+"SetTextStyleRefN": {
+"class": "safe",
+"via": "SetTextStyleRefN"
+},
+"SetTextWidth": {
+"class": "safe",
+"via": "SetTextWidth"
+},
+"SetTextWrap": {
+"class": "safe",
+"via": "SetTextWrap"
+},
+"SetTextureRef": {
+"class": "safe",
+"via": "SetTextureRef"
+},
+"SetTextureRefN": {
+"class": "safe",
+"via": "SetTextureRefN"
+},
+"SetThreeStateCheckBoxState": {
+"class": "interactive",
+"via": "SetThreeStateCheckBoxState"
+},
+"SetTileBackgroundColor": {
+"class": "safe",
+"via": "SetTileBackgroundColor"
+},
+"SetToolByIndex": {
+"class": "safe",
+"via": "SetToolByIndex"
+},
+"SetToolHelpMessage": {
+"class": "interactive",
+"via": "SetToolHelpMessage"
+},
+"SetTrapeziumAttributes": {
+"class": "safe",
+"via": "SetTrapeziumAttributes"
+},
+"SetUseWallClosure": {
+"class": "safe",
+"via": "SetUseWallClosure"
+},
+"SetViewCenter": {
+"class": "safe",
+"via": "SetVCenter"
+},
+"SetWallCaps": {
+"class": "safe",
+"via": "SetWallCaps"
+},
+"SetWallCapsOffsets": {
+"class": "safe",
+"via": "SetWallCapsOffsets"
+},
+"SetWallCornerHeights": {
+"class": "safe",
+"via": "SetWallCornerHeights"
+},
+"SetWallPrefStyle": {
+"class": "safe",
+"via": "SetWallPrefStyle"
+},
+"SetWallStyle": {
+"class": "safe",
+"via": "SetWallStyle"
+},
+"SetWallWidth": {
+"class": "safe",
+"via": "SetWallWidth"
+},
+"SetWorksheetGridLinesVisibility": {
+"class": "safe",
+"via": "SetWorksheetGridLinesVisibility"
+},
+"ShowByClassChoice": {
+"class": "interactive",
+"via": "ShowByClassChoice"
+},
+"ShowCreateImageDialog": {
+"class": "interactive",
+"via": "ShowCreateImageDialog"
+},
+"ShowEnhancedPullDownMenuGroupIcon": {
+"class": "interactive",
+"via": "ShowEnhancedPullDownMenuGroupIcon"
+},
+"ShowItem": {
+"class": "interactive",
+"via": "ShowItem"
+},
+"ShowNewTileDialog": {
+"class": "interactive",
+"via": "ShowNewTileDialog"
+},
+"SysBeep": {
+"class": "safe",
+"via": "SysBeep"
+},
+"TagSubObjectAsPart": {
+"class": "safe",
+"via": "TagSubObjectAsPart"
+},
+"TrimNurbsSurface": {
+"class": "safe",
+"via": "TrimNurbsSurface"
+},
+"UpdateImageControl2": {
+"class": "interactive",
+"via": "UpdateImageControl2"
+},
+"UpdatePIOFromStyle": {
+"class": "safe",
+"via": "UpdatePIOFromStyle"
+},
+"UpdateThumbnailPreview": {
+"class": "safe",
+"via": "UpdateThumbnailPreview"
+},
+"UpdateViewport": {
+"class": "safe",
+"via": "UpdateVP"
+},
+"VerifyLayout": {
+"class": "interactive",
+"via": "VerifyLayout"
+}
+},
 "pairs": {
 "BeginContext": "EndContext",
 "BeginFolder": "EndFolder",

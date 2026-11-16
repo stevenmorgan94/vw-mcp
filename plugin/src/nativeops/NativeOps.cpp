@@ -8,6 +8,7 @@
 //
 
 #include "NativeOps.h"
+#include "bridge/ScriptRunner.h"
 
 #include <unordered_map>
 
@@ -86,7 +87,49 @@ static bool IsBlockedIsdkCall( const std::string& fn )
 	       fn.rfind( "CreateWorksheet", 0 ) == 0;
 }
 
-nlohmann::json RunNativeOps( const std::string& opsJson )
+// The refusal for an ISDK method by its class (#11): the same rules as the Python guard's refusal_for.
+static nlohmann::json CallRefusal( const std::string& fn, const nlohmann::json& opts )
+{
+	std::string cls, via;
+	IsdkClass( fn, cls, via );
+	if ( IsBlockedIsdkCall( fn ) ) cls = "crasher";
+	if ( cls == "safe" ) return nullptr;
+	if ( cls == "document-level" && opts.value( "allowDocumentLevel", false ) ) return nullptr;
+	if ( cls == "unclassified" && opts.value( "allowUnclassified", false ) ) return nullptr;
+	static const std::map<std::string, std::string> kReasons = {
+		{ "crasher", "crashes Vectorworks" }, { "hang", "hangs Vectorworks" },
+		{ "interactive", "opens a dialog or waits for user input, which a remote client cannot answer" },
+		{ "event-only", "only works inside a plug-in object or tool event handler, which a remote script is not" },
+		{ "document-level", "opens, closes or replaces a document or window" },
+		{ "unclassified", "has not been safety-tested" } };
+	auto r = kReasons.find( cls );
+	std::string reason = "ISDK " + fn + " " + ( r != kReasons.end() ? r->second : "is not allowed" ) +
+	                     ( via.empty() ? "." : " (class taken from vs." + via + ")." );
+	std::string advice = cls == "unclassified" ? "Set allowUnclassified: true to run it anyway (at your own risk)."
+	                   : cls == "document-level" ? "Set allowDocumentLevel: true to run it anyway." : "";
+	nlohmann::json body = Refusal( cls, reason, advice );
+	body["function"] = fn;
+	return body;
+}
+
+// Handle arguments that name an object which doesn't exist would reach the SDK as null (#11).
+static nlohmann::json UnresolvedHandleArg( const std::string& fn, const nlohmann::json& args )
+{
+	if ( !args.is_array() ) return nullptr;
+	for ( size_t i = 0; i < args.size(); ++i )
+	{
+		const auto& a = args[i];
+		if ( !a.is_object() || !( a.contains( "$h" ) || a.contains( "$name" ) || a.contains( "$layer" ) ) ) continue;
+		if ( ResolveHandle( a ) ) continue;
+		nlohmann::json body = Refusal( "argument", "ISDK " + fn + ": args[" + std::to_string( i ) + "] " + a.dump() +
+		                               " doesn't resolve to an object.", "Check the name, layer or handle id (handles from \"as\" last for one job)." );
+		body["function"] = fn;
+		return body;
+	}
+	return nullptr;
+}
+
+nlohmann::json RunNativeOps( const std::string& opsJson, const nlohmann::json& opts )
 {
 	nlohmann::json result;
 	nlohmann::json ops;
@@ -125,13 +168,16 @@ nlohmann::json RunNativeOps( const std::string& opsJson )
 				int            asId = ( op.contains("as") && op["as"].is_number_integer() )
 				                      ? op["as"].get<int>() : -1;
 				nlohmann::json args = op.contains("args") ? op["args"] : nlohmann::json::array();
-				if ( IsBlockedIsdkCall( fn ) )
+				// Refused before it runs. Ops earlier in the list already ran: report them and stop.
+				nlohmann::json refusal = CallRefusal( fn, opts );
+				if ( refusal.is_null() ) refusal = UnresolvedHandleArg( fn, args );
+				if ( !refusal.is_null() )
 				{
-					item["fn"]    = fn;
-					item["ok"]    = false;
-					item["error"] = "Refused: " + fn + " is on the native-op blocklist";
-					created.push_back( item );
-					continue;
+					refusal["partialChanges"] = !created.empty();
+					if ( !created.empty() )
+						refusal["advice"] = ( refusal.value( "advice", std::string() ) + " Earlier ops in this list already ran; Edit > Undo reverts the whole job in one step." );
+					refusal["created"] = created;
+					return refusal;
 				}
 				created.push_back( DispatchIsdkCall( fn, args, asId ) );
 				continue;
