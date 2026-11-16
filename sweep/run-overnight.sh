@@ -9,7 +9,10 @@ HERE=${0:A:h}; TAG=${TAG:-v0}; BACKUP=${1:?backup dir}; shift; LIVE=~/Library/Ap
 # The marker lives in Plug-ins/, which the restore below excludes, so remove it explicitly.
 MARKER="$LIVE/Plug-ins/Data/vw-mcp/SWEEP_MODE"
 mkdir -p "${MARKER:h}"
-touch "$MARKER"; trap 'rm -f "$MARKER"' EXIT
+touch "$MARKER"
+# The harness talks MCP over HTTP: run the relay in --http mode for the length of the sweep.
+node "$HERE/../relay/server.mjs" --http 2>>"$HERE/results/relay-$TAG.log" & RELAY_PID=$!
+trap 'rm -f "$MARKER"; kill $RELAY_PID 2>/dev/null' EXIT
 caffeinate -dims node "$HERE/sweep.mjs" --log "$HERE/results/run-$TAG.jsonl" "$@"
 rc=$?
 echo "$(date +%T) sweep exited $rc; quitting VW and restoring the user folder"

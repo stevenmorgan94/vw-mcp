@@ -1,9 +1,8 @@
 #!/bin/zsh
 # Relaunch Vectorworks 2027 with no human: kill it if running, launch, clear the startup
-# dialogs, open a blank doc, and wait for the bridge palette to reach the MCP relay.
-# Needs Accessibility for the app running this script. Exit 0 = palette connected.
-# Assumes the bridge palette was left open AND expanded at the last clean quit.
-# TODO(#6): once the plug-in is headless, wait for its /status instead of the palette.
+# dialogs, open a blank doc, and wait for the vw-mcp plug-in to answer through the relay.
+# Needs Accessibility for the app running this script, and the relay running with --http
+# (sweep/run-overnight.sh starts it). Exit 0 = plug-in reachable and a document is open.
 set -u
 TIMEOUT=${VW_RELAUNCH_TIMEOUT:-420}
 log() { print -r -- "$(date +%H:%M:%S) $*"; }
@@ -74,12 +73,12 @@ end tell
 EOF
 )
   [[ "$out" == *" "?* && "$out" != "$last" ]] && log "$out"; last=$out
-  if curl -s -m 2 http://127.0.0.1:9101/health | grep -q '"paletteConnected":true' \
+  if curl -s -m 2 "http://127.0.0.1:${VW_MCP_HTTP_PORT:-47822}/health" | grep -q '"vectorworks":{' \
      && { (( ! ${VW_NEWDOC:-1} )) || [[ "$out" == *Untitled* ]]; }; then
-    log "READY: palette connected after $((SECONDS-start))s"; exit 0
+    log "READY: plug-in reachable after $((SECONDS-start))s"; exit 0
   fi
   # Startup finished (home screen up, no document) -> ask for a blank doc once.
-  if (( ! newdoc_sent && ${VW_NEWDOC:-1} )) && { (( $(homes) > homes0 )) || curl -s -m 2 http://127.0.0.1:9101/health | grep -q '"paletteConnected":true'; } \
+  if (( ! newdoc_sent && ${VW_NEWDOC:-1} )) && { (( $(homes) > homes0 )) || curl -s -m 2 "http://127.0.0.1:${VW_MCP_HTTP_PORT:-47822}/health" | grep -q '"vectorworks":{'; } \
      && [[ "$out" != *Untitled* && "$out" != *"Create Document"* ]]; then
     osascript -e 'tell application "Vectorworks 2027" to activate' -e 'delay 0.5' \
       -e 'tell application "System Events" to tell process "Vectorworks" to keystroke "n" using command down' >/dev/null 2>&1
@@ -87,4 +86,4 @@ EOF
   fi
   sleep 2
 done
-log "TIMEOUT: palette never connected"; exit 1
+log "TIMEOUT: plug-in never reachable"; exit 1
