@@ -1,0 +1,15 @@
+# Node
+node_modules/
+
+# Plug-in build output (tools/build-plugin.sh, xcodebuild)
+/build/
+DerivedData/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+plugin/Config/Local.xcconfig
+
+# Sweep run logs and summaries
+sweep/results/
+
+# macOS
+.DS_Store

@@ -1,0 +1,230 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000000000000000000101 /* ModuleMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000001 /* ModuleMain.cpp */; };
+		A10000000000000000000102 /* HeadlessHost.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000003 /* HeadlessHost.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A10000000000000000000001 /* ModuleMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ModuleMain.cpp; sourceTree = "<group>"; };
+		A10000000000000000000002 /* HeadlessHost.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HeadlessHost.h; sourceTree = "<group>"; };
+		A10000000000000000000003 /* HeadlessHost.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HeadlessHost.cpp; sourceTree = "<group>"; };
+		A10000000000000000000004 /* Prefix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Prefix.h; sourceTree = "<group>"; };
+		A10000000000000000000005 /* IsdkDispatch.inc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.pascal; path = IsdkDispatch.inc; sourceTree = "<group>"; };
+		A10000000000000000000006 /* VsSafety.generated.inc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.pascal; path = VsSafety.generated.inc; sourceTree = "<group>"; };
+		A10000000000000000000007 /* vw-mcp.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "vw-mcp.xcconfig"; sourceTree = "<group>"; };
+		A10000000000000000000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A10000000000000000000009 /* vw-mcp.vwr */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "vw-mcp.vwr"; sourceTree = "<group>"; };
+		A10000000000000000000010 /* vw-mcp.vwlibrary */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "vw-mcp.vwlibrary"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A10000000000000000000201 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A10000000000000000000301 = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000302 /* src */,
+				A10000000000000000000306 /* Config */,
+				A10000000000000000000008 /* Info.plist */,
+				A10000000000000000000009 /* vw-mcp.vwr */,
+				A10000000000000000000307 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A10000000000000000000302 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000001 /* ModuleMain.cpp */,
+				A10000000000000000000004 /* Prefix.h */,
+				A10000000000000000000303 /* bridge */,
+				A10000000000000000000304 /* nativeops */,
+				A10000000000000000000305 /* safety */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000303 /* bridge */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000002 /* HeadlessHost.h */,
+				A10000000000000000000003 /* HeadlessHost.cpp */,
+			);
+			path = bridge;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000304 /* nativeops */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000005 /* IsdkDispatch.inc */,
+			);
+			path = nativeops;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000305 /* safety */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000006 /* VsSafety.generated.inc */,
+			);
+			path = safety;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000306 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000007 /* vw-mcp.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000307 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000010 /* vw-mcp.vwlibrary */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A10000000000000000000401 /* vw-mcp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000000000000000000602 /* Build configuration list for PBXNativeTarget "vw-mcp" */;
+			buildPhases = (
+				A10000000000000000000202 /* Sources */,
+				A10000000000000000000201 /* Frameworks */,
+				A10000000000000000000203 /* Package VWR resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "vw-mcp";
+			productName = "vw-mcp";
+			productReference = A10000000000000000000010 /* vw-mcp.vwlibrary */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A10000000000000000000501 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = A10000000000000000000601 /* Build configuration list for PBXProject "vw-mcp" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A10000000000000000000301;
+			productRefGroup = A10000000000000000000307 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A10000000000000000000401 /* vw-mcp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		A10000000000000000000203 /* Package VWR resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Package VWR resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Packages vw-mcp.vwr (strings, images) into the bundle with the SDK's BuildVWR tool.\nset -e\nexport VWR_INPUT=\"${PROJECT_DIR}/${EXECUTABLE_NAME}.vwr\"\nexport VWR_OUTPUT=\"${CODESIGNING_FOLDER_PATH}/Contents/Resources/${EXECUTABLE_NAME}.vwr\"\n# Always Release mode: Debug mode symlinks the .vwr back to the source tree, so the bundle would\n# not be self-contained once deploy-plugin.sh copies it into the Plug-ins folder.\nexport VWR_MODE=Release\n\"${VW_SDK_DIR}/SDKLib/ToolsMac/BuildVWR/BuildVWR\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A10000000000000000000202 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000101 /* ModuleMain.cpp in Sources */,
+				A10000000000000000000102 /* HeadlessHost.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A10000000000000000000701 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A10000000000000000000007 /* vw-mcp.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		A10000000000000000000702 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A10000000000000000000007 /* vw-mcp.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		A10000000000000000000703 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		A10000000000000000000704 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A10000000000000000000601 /* Build configuration list for PBXProject "vw-mcp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000701 /* Debug */,
+				A10000000000000000000702 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A10000000000000000000602 /* Build configuration list for PBXNativeTarget "vw-mcp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000703 /* Debug */,
+				A10000000000000000000704 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A10000000000000000000501 /* Project object */;
+}
