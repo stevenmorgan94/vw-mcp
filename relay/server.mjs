@@ -2,49 +2,40 @@
 //
 // vw-mcp: MCP server for Vectorworks (relay)
 // =============================================================================
-// TODO(#6): this is the transport carried over unchanged from the original
-// palette bridge. Ticket #6 replaces it: the headless plug-in serves
-// POST /jobs, GET /jobs/{id}?wait=N and GET /status on 127.0.0.1 (bearer token,
-// discovery file), and this relay becomes an HTTP client of it (stdio MCP by
-// default for `npx -y vw-mcp`). Until then nothing in this repo dials :9100.
+//   AI client --MCP (stdio, or Streamable HTTP with --http)--> THIS RELAY
+//             --HTTP 127.0.0.1 + bearer token--> vw-mcp plug-in (headless, inside Vectorworks)
 //
-// Persistent relay. Owns two ports:
-//   - WebSocket :9100  — the Vectorworks bridge palette dials in to this (palette side)
-//   - HTTP      :9101  — MCP clients connect here  (/mcp, Streamable HTTP)
+// The plug-in starts with Vectorworks and writes a discovery file per running instance:
+//   ~/Library/Application Support/vw-mcp/instances/<pid>.json  { pid, port, token, vwBuild, ... }
+// The relay reads it on every call, so restarting Vectorworks needs nothing here.
+// VW_MCP_INSTANCE=<pid> picks one instance when several Vectorworks versions run at once.
 //
-//   AI client (MCP)  --HTTP /mcp-->  THIS PROCESS  --WS :9100-->  palette (in VW)
-//                                                                    |
-//                                                    <palette JS bridge>.execute_script
-//                                                                    |
-//                                                        C++ bridge -> VW main thread
+//   npx -y vw-mcp              stdio MCP server (what AI clients launch)
+//   npx -y vw-mcp --http       Streamable HTTP on 127.0.0.1:$VW_MCP_HTTP_PORT (default 47822), /mcp
 //
-// Because this process is standalone (not spawned per client session over stdio),
-// the palette always has something to connect to, there are no port clashes between
-// sessions, and multiple MCP client sessions can share it.
-//
-// Pass `--stdio` to run as a classic stdio MCP server instead of HTTP (used by the
-// headless test; stdout is then reserved for the MCP protocol). All logs go to stderr.
+// All logs go to stderr (stdout is the MCP protocol in stdio mode).
 // -----------------------------------------------------------------------------
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
-import { WebSocketServer } from 'ws';
 import { randomUUID } from 'node:crypto';
 import express from 'express';
 import { z } from 'zod';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
-const WS_PORT         = Number(process.env.VW_MCP_WS_PORT || 9100);
-const HTTP_PORT       = Number(process.env.VW_MCP_HTTP_PORT || 9101);
-const CALL_TIMEOUT_MS = Number(process.env.VW_MCP_CALL_TIMEOUT_MS || 60000);
-const USE_STDIO       = process.argv.includes('--stdio');
-
-// Deferred-execution (crash-safe writes): poll cadence + overall wait for a job to finish.
-const DEFER_POLL_INTERVAL_MS = Number(process.env.VW_MCP_DEFER_POLL_MS || 150);
+const HTTP_PORT  = Number(process.env.VW_MCP_HTTP_PORT || 47822);
+const USE_HTTP   = process.argv.includes('--http');
+const INSTANCE   = process.env.VW_MCP_INSTANCE ? Number(process.env.VW_MCP_INSTANCE) : null;
+const INSTANCES_DIR = process.env.VW_MCP_INSTANCES_DIR ||
+  (process.platform === 'win32'
+    ? path.join(process.env.APPDATA || os.homedir(), 'vw-mcp', 'instances')
+    : path.join(os.homedir(), 'Library', 'Application Support', 'vw-mcp', 'instances'));
+const MAX_WAIT_SEC = 20;   // long-poll slice; the plug-in caps it at 25
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const log = (...a) => console.error('[vw-mcp]', ...a);
@@ -81,57 +72,53 @@ function parseCSV(text) {
 let lastEvent = null;   // last refusal / timeout / unresponsive, for vw_bridge_status
 
 // -----------------------------------------------------------------------------
-// WebSocket relay — the palette connects out to us.
+// Plug-in client: find the running Vectorworks instance and call its internal endpoints.
 // -----------------------------------------------------------------------------
-let palette = null;                 // currently connected palette socket (last wins)
-let nextId  = 1;
-const pending = new Map();          // id -> { resolve, reject, timer }
+const NOT_RUNNING = 'Vectorworks with the vw-mcp plug-in is not running. Start Vectorworks ' +
+  '(the plug-in starts with it), then retry. Check the vw-mcp status palette if it still fails.';
 
-const wss = new WebSocketServer({ host: '127.0.0.1', port: WS_PORT });
+function pidAlive(pid) { try { process.kill(pid, 0); return true; } catch (e) { return e.code === 'EPERM'; } }
 
-wss.on('listening', () => log(`WebSocket relay listening on ws://127.0.0.1:${WS_PORT}`));
-wss.on('error', (err) => log('WebSocket server error:', err.message));
-
-wss.on('connection', (sock) => {
-  if (palette && palette !== sock && palette.readyState === palette.OPEN) {
-    log('A new palette connected — replacing the previous one.');
+// Live instances, newest first. Stale files (VW crashed) are skipped and removed.
+function findInstances() {
+  let names = [];
+  try { names = fs.readdirSync(INSTANCES_DIR).filter((f) => f.endsWith('.json')); } catch { return []; }
+  const out = [];
+  for (const f of names) {
+    const file = path.join(INSTANCES_DIR, f);
+    try {
+      const d = JSON.parse(fs.readFileSync(file, 'utf8'));
+      if (!pidAlive(d.pid)) { try { fs.unlinkSync(file); } catch {} continue; }
+      out.push(d);
+    } catch { /* half-written: skip */ }
   }
-  palette = sock;
-  log('Palette connected.');
+  return out.sort((a, b) => String(b.started).localeCompare(String(a.started)));
+}
+function pickInstance() {
+  const all = findInstances();
+  return (INSTANCE ? all.find((d) => d.pid === INSTANCE) : all[0]) ?? null;
+}
 
-  sock.on('message', (raw) => {
-    let msg;
-    try { msg = JSON.parse(raw.toString()); }
-    catch { log('Ignoring non-JSON message from palette:', raw.toString().slice(0, 200)); return; }
-    const entry = msg && msg.id != null ? pending.get(msg.id) : null;
-    if (!entry) return;
-    pending.delete(msg.id);
-    clearTimeout(entry.timer);
-    if (msg.error) entry.reject(new Error(String(msg.error)));
-    else entry.resolve(msg.result);
-  });
-
-  sock.on('close', () => { if (palette === sock) palette = null; log('Palette disconnected.'); });
-  sock.on('error', (err) => log('Palette socket error:', err.message));
-});
-
-// Send a command to the palette and await its reply, keyed by a fresh id.
-function callPalette(method, params) {
-  return new Promise((resolve, reject) => {
-    if (!palette || palette.readyState !== palette.OPEN) {
-      reject(new Error(
-        'No Vectorworks palette connected. Open Vectorworks, show the bridge palette, ' +
-        'and make sure its MCP Bridge tab is connected to this relay.'));
-      return;
-    }
-    const id = nextId++;
-    const timer = setTimeout(() => {
-      pending.delete(id);
-      reject(new Error(`Timed out after ${CALL_TIMEOUT_MS}ms waiting for the palette to run ${method}.`));
-    }, CALL_TIMEOUT_MS);
-    pending.set(id, { resolve, reject, timer });
-    palette.send(JSON.stringify({ id, method, params }));
-  });
+let clientName = '';   // the MCP client's name (from initialize), shown in the status palette
+async function plugin(method, route, body, timeoutMs = 30000) {
+  const inst = pickInstance();
+  if (!inst) throw new Error(NOT_RUNNING);
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`http://127.0.0.1:${inst.port}${route}`, {
+      method,
+      headers: { Authorization: `Bearer ${inst.token}`, 'Content-Type': 'application/json',
+        ...(clientName ? { 'X-VW-MCP-Client': clientName } : {}) },
+      body: body ? JSON.stringify(body) : undefined,
+      signal: ctl.signal,
+    });
+    const j = await res.json().catch(() => ({ ok: false, error: `HTTP ${res.status}` }));
+    return j;
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error(`Vectorworks did not answer within ${Math.round(timeoutMs / 1000)} s.`);
+    throw new Error(NOT_RUNNING + ` (${e.cause?.code || e.message})`);
+  } finally { clearTimeout(timer); }
 }
 
 // -----------------------------------------------------------------------------
@@ -144,24 +131,26 @@ const asText = (value) => ({
 const asError = (message) => ({ content: [{ type: 'text', text: message }], isError: true });
 
 function buildMcpServer() {
-  const mcp = new McpServer({ name: 'vw-mcp', version: '0.0.0' });
+  const mcp = new McpServer({ name: 'vw-mcp', version: '0.1.0' });
 
-  // Submit a job to the bridge (always deferred: it runs on a clean main-loop pass) and poll for its result.
+  // Submit a job to the plug-in (it runs on a clean main-loop pass) and long-poll for its result.
   async function runJob(params, timeoutSec) {
-    const submit = await callPalette('execute_script', { ...params, defer: true });
-    if (!submit || submit.deferred !== true || submit.jobId == null) return submit;   // refused up front, or an old bridge
+    clientName = mcp.server.getClientVersion()?.name || clientName;
+    const submit = await plugin('POST', '/jobs', params);
+    if (!submit || submit.jobId == null) return submit;   // refused up front
     const jobId = submit.jobId;
     const deadline = Date.now() + (timeoutSec + 25) * 1000;   // script budget + busy wait + slack
     for (;;) {
-      await sleep(DEFER_POLL_INTERVAL_MS);
-      const r = await callPalette('execute_script', { poll: jobId });
-      if (!r || r.pending !== true) return r;
+      const r = await plugin('GET', `/jobs/${jobId}?wait=${MAX_WAIT_SEC}`, null, (MAX_WAIT_SEC + 10) * 1000)
+        .catch((e) => ({ pending: true, transient: e.message }));
+      if (r && r.pending !== true) return r;
       if (Date.now() > deadline) {
         lastEvent = { at: new Date().toISOString(), kind: 'unresponsive', jobId };
         return { ok: false, unresponsive: true, jobId,
           error: `Vectorworks is unresponsive: job ${jobId} did not finish within ${timeoutSec + 25} s. ` +
             'It may be stuck inside a Vectorworks call or have crashed. It is never force-quit by this server.' };
       }
+      if (r?.transient) await sleep(1000);
     }
   }
   // Refusals and timeouts come back as isError with the refusal body first (spec §4).
@@ -256,34 +245,34 @@ function buildMcpServer() {
 
   mcp.tool(
     'vw_bridge_status',
-    'Check whether the Vectorworks bridge palette is connected to this MCP relay: the running Vectorworks build, whether ' +
+    'Check the connection to Vectorworks: whether the vw-mcp plug-in is running, the Vectorworks build, whether ' +
     'a document is open or a dialog is blocking jobs, the safety table in use (with a warning when it was swept on a ' +
-    'different build), and the last refusal or timeout.',
+    'different build), and the last refusal or timeout. Call this first.',
     {},
     async () => {
       loadSafety();
-      const connected = !!(palette && palette.readyState === palette.OPEN);
-      // Live bridge state. An older plug-in without the info request answers with an error: report it as unknown.
-      let info = null;
-      if (connected) info = await callPalette('execute_script', { info: true }).catch(() => null);
-      if (info && !info.vwBuild) info = null;
+      clientName = mcp.server.getClientVersion()?.name || clientName;
+      const inst = pickInstance();
+      let info = null, error = null;
+      if (inst) info = await plugin('GET', '/status', null, 5000).catch((e) => { error = e.message; return null; });
+      else error = NOT_RUNNING;
       const mismatch = info && safetyTable.vwBuild && info.vwBuild !== safetyTable.vwBuild;
       return asText({
-        paletteConnected: connected,
-        vwBuild: info?.vwBuild ?? null,
+        connected: !!info?.ok,
+        vwBuild: info?.vwBuild ?? inst?.vwBuild ?? null,
         engine: info?.engine ?? null,
         documentOpen: info?.documentOpen ?? null,
         busy: info?.busy ?? null,
         sweepMode: info?.sweepMode ?? null,
         guardVersion: info?.guardVersion ?? null,
+        plugin: info ? { version: info.pluginVersion, port: info.port, pid: info.pid } : null,
+        otherInstances: findInstances().filter((d) => d.pid !== inst?.pid).map((d) => ({ pid: d.pid, vwBuild: d.vwBuild })),
         safetyTable: { vwBuild: safetyTable.vwBuild, source: safetyTable.source,
           functions: Object.keys(safetyTable.functions).length, error: safetyTable.error },
         warning: mismatch ? `Vectorworks is ${info.vwBuild} but the safety table was swept on ${safetyTable.vwBuild}. ` +
           'Classes carry forward, but a function that changed in this build may behave differently; re-run the sweep.' : null,
+        error,
         lastEvent,
-        wsPort: WS_PORT,
-        httpPort: HTTP_PORT,
-        pendingCalls: pending.size,
       });
     },
   );
@@ -294,7 +283,7 @@ function buildMcpServer() {
 // -----------------------------------------------------------------------------
 // Boot — HTTP (default) or stdio (--stdio)
 // -----------------------------------------------------------------------------
-if (USE_STDIO) {
+if (!USE_HTTP) {
   const transport = new StdioServerTransport();
   await buildMcpServer().connect(transport);
   log('MCP server ready on stdio.');
@@ -339,16 +328,16 @@ if (USE_STDIO) {
   app.delete('/mcp', sessionRequest);
 
   // Tiny health endpoint for humans / monitoring.
-  app.get('/health', (req, res) => res.json({
-    ok: true,
-    paletteConnected: !!(palette && palette.readyState === palette.OPEN),
-  }));
+  app.get('/health', (req, res) => {
+    const inst = pickInstance();
+    res.json({ ok: true, vectorworks: inst ? { pid: inst.pid, port: inst.port, vwBuild: inst.vwBuild } : null });
+  });
 
   app.listen(HTTP_PORT, '127.0.0.1', () => {
     log(`MCP server (Streamable HTTP) on http://127.0.0.1:${HTTP_PORT}/mcp`);
   });
 }
 
-const shutdown = () => { try { wss.close(); } catch {} process.exit(0); };
+const shutdown = () => process.exit(0);
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);

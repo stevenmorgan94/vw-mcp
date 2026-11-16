@@ -3,8 +3,7 @@
 //  The launch hook: an IObjUpdateSupport provider registered in GROUPID_ObjUpdateSupport.
 //  Vectorworks calls Init() at startup, with no UI and before any document exists.
 //
-//  Scaffold only (#5): Init() logs and does nothing else. Ticket #6 starts the local HTTP server
-//  here (background thread, never calls the SDK) and stops it on application shutdown.
+//  Init() starts the bridge (Bridge.h); the application-quit notifications stop it.
 //
 #pragma once
 
@@ -21,6 +20,7 @@ namespace VwMcp
 
         // IObjUpdateSupport
         virtual void VCOM_CALLTYPE Init(VectorWorks::Extension::IObjUpdateSupportContext* context);
+        virtual void VCOM_CALLTYPE OnNotification(VectorWorks::Extension::IObjUpdateSupportContext* context);
     };
 
     // Writes one line to the system log (macOS: unified logging, subsystem "vw-mcp";

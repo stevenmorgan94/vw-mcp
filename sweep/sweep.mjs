@@ -22,7 +22,8 @@ const V2 = args.includes('--v2');
 const TIERS = opt('--tiers', '1,2,3').split(',').map(Number);
 const LOG = opt('--log', path.join(HERE, 'results', 'run-v0.jsonl'));
 const RELAUNCH = path.join(HERE, 'vw-relaunch.sh');
-const MCP_URL = 'http://127.0.0.1:9101/mcp';
+const RELAY = `http://127.0.0.1:${process.env.VW_MCP_HTTP_PORT || 47822}`;   // relay/server.mjs --http
+const MCP_URL = `${RELAY}/mcp`;
 const MODAL_CHECK_MS = 10000;   // no result after this -> look for a modal
 const HANG_MS = 40000;          // no result after this (incl. modal handling) -> hang
 const RECYCLE_EVERY = 1000;     // fresh VW + doc every N jobs
@@ -324,8 +325,8 @@ async function mcp() {
 async function waitBridge(ms = 90000) {
   const end = Date.now() + ms;
   while (Date.now() < end) {
-    const h = await fetch('http://127.0.0.1:9101/health').then((r) => r.json()).catch(() => ({}));
-    if (h.paletteConnected) { try { await mcp(); return true; } catch { await dropClient(); } }
+    const h = await fetch(`${RELAY}/health`).then((r) => r.json()).catch(() => ({}));
+    if (h.vectorworks) { try { await mcp(); return true; } catch { await dropClient(); } }
     await new Promise((r) => setTimeout(r, 2000));
   }
   return false;
@@ -432,7 +433,7 @@ async function recover(why) {
   }
 }
 
-if (!(await fetch('http://127.0.0.1:9101/health').then((r) => r.json()).catch(() => ({}))).paletteConnected || !vwWindows()?.some((w) => /Untitled/.test(w))) {
+if (!(await fetch(`${RELAY}/health`).then((r) => r.json()).catch(() => ({}))).vectorworks || !vwWindows()?.some((w) => /Untitled/.test(w))) {
   if (!(await recover('initial'))) process.exit(2);
 }
 let baseline = vwWindows() ?? [];
@@ -464,7 +465,7 @@ for (const job of jobs) {
       else if (j?.ok) outcome = 'ok';
       else if (/block|refus|stub/i.test(text)) outcome = 'refused';
       else if (j && !j.ok) outcome = 'error';
-      else if (/palette|not connected|Timed out/i.test(text) && !vwAlive()) outcome = 'crash';
+      else if (/not running|not connected|did not answer|Timed out/i.test(text) && !vwAlive()) outcome = 'crash';
       else outcome = isError ? 'bridge-error' : 'error';
     }
     detail.error = j?.error; detail.stdout = j?.stdout?.slice(0, 300); detail.stderr = j?.stderr?.slice(-400); if (!j) detail.text = text.slice(0, 400);

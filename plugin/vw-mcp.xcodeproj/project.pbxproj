@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		A10000000000000000000101 /* ModuleMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000001 /* ModuleMain.cpp */; };
 		A10000000000000000000102 /* HeadlessHost.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000003 /* HeadlessHost.cpp */; };
+		A10000000000000000000120 /* Bridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000020 /* Bridge.cpp */; };
+		A10000000000000000000122 /* ScriptRunner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000022 /* ScriptRunner.cpp */; };
+		A10000000000000000000125 /* NativeOps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000025 /* NativeOps.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +25,13 @@
 		A10000000000000000000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A10000000000000000000009 /* vw-mcp.vwr */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "vw-mcp.vwr"; sourceTree = "<group>"; };
 		A10000000000000000000010 /* vw-mcp.vwlibrary */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "vw-mcp.vwlibrary"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000020 /* Bridge.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Bridge.cpp; sourceTree = "<group>"; };
+		A10000000000000000000021 /* Bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bridge.h; sourceTree = "<group>"; };
+		A10000000000000000000022 /* ScriptRunner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptRunner.cpp; sourceTree = "<group>"; };
+		A10000000000000000000023 /* ScriptRunner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptRunner.h; sourceTree = "<group>"; };
+		A10000000000000000000024 /* SdkScopes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SdkScopes.h; sourceTree = "<group>"; };
+		A10000000000000000000025 /* NativeOps.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NativeOps.cpp; sourceTree = "<group>"; };
+		A10000000000000000000026 /* NativeOps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NativeOps.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +71,11 @@
 		A10000000000000000000303 /* bridge */ = {
 			isa = PBXGroup;
 			children = (
+				A10000000000000000000024 /* SdkScopes.h */,
+				A10000000000000000000023 /* ScriptRunner.h */,
+				A10000000000000000000022 /* ScriptRunner.cpp */,
+				A10000000000000000000021 /* Bridge.h */,
+				A10000000000000000000020 /* Bridge.cpp */,
 				A10000000000000000000002 /* HeadlessHost.h */,
 				A10000000000000000000003 /* HeadlessHost.cpp */,
 			);
@@ -70,6 +85,8 @@
 		A10000000000000000000304 /* nativeops */ = {
 			isa = PBXGroup;
 			children = (
+				A10000000000000000000026 /* NativeOps.h */,
+				A10000000000000000000025 /* NativeOps.cpp */,
 				A10000000000000000000005 /* IsdkDispatch.inc */,
 			);
 			path = nativeops;
@@ -171,6 +188,9 @@
 			files = (
 				A10000000000000000000101 /* ModuleMain.cpp in Sources */,
 				A10000000000000000000102 /* HeadlessHost.cpp in Sources */,
+				A10000000000000000000125 /* NativeOps.cpp in Sources */,
+				A10000000000000000000122 /* ScriptRunner.cpp in Sources */,
+				A10000000000000000000120 /* Bridge.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
