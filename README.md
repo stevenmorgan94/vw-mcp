@@ -59,7 +59,7 @@ A refused call returns an error with `{refused, function, class, reason, alterna
 | "Vectorworks is busy (a dialog is open)" | Close the open dialog in Vectorworks, then retry. |
 | "No document is open" | Open or create a drawing. |
 | A version warning in `vw_bridge_status` | The plug-in and the relay come from different releases. Install both from the same release. |
-| vw-mcp is in the *Incompatible Plug-ins Report* with version "Unknown", or the plug-in file disappears | The download flag wasn't cleared (step 2). Download the zip again, run the `xattr` line on the unzipped plug-in, reinstall, and restart Vectorworks. |
+| vw-mcp is in the *Incompatible Plug-ins Report* with version "Unknown", or the plug-in file disappears | The download flag wasn't cleared (step 2). Download the zip again, run the `xattr` line on the unzipped plug-in and reinstall. Vectorworks switches a plug-in off after it fails to load, so turn **vw-mcp** back on in *Plug-in Manager › Third-party Plug-ins*, then restart Vectorworks. |
 
 ## How it works
 
