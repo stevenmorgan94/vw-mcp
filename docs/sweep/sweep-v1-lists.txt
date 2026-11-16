@@ -1,0 +1,14 @@
+2028 functions {'safe': 2003, 'refused': 1, 'interactive': 15, 'crasher': 7, 'document-level': 1, 'hang': 1} | argCheck 78
+context differs: []
+
+crasher (7): CC_GetCircuitDest, CC_GetCircuitSource, Plant_ReplacePlantParam, SetConstraintValue, SetTexSpaceEndCap, TBB_AttachRecords, UprString
+
+hang (1): RefreshResManager
+
+interactive (15): BindLayerToArcGISFS, EditGeorefWithUI, GetProduct, Plant_CreateDupPlant, Plant_LocateStyleMgr, Plant_ReplacePlant, Record, RunImageComp, SetBinaryConstraint, SetSingularConstraint, Space_AddAreaModif, TBB_UpdateOldVAATB, UpdateFeatureLayer, UpdateLayerFromFS, WallPeak
+
+document-level (1): Space_CreateSpace
+
+refused (1): BuildResourceListN2
+
+safe + argCheck (66): ApplyLightInfoRecord[crash], BeginPoly[crash], CallToolByName[crash], CreateScriptResource[window], CreateVPLrOvrd[crash], EndSym[crash], GetBinaryConstraint[crash], GetComponents[crash], GetDisplayWith2DComp[crash], GetDropShadowByCls[crash], GetGradientData[crash], GetGradientDataN[crash], GetGradientMidpointPosition[crash], GetGradientOpacity[crash], GetGradientSpotColor[crash], GetGradientSpotPosition[crash], GetNumGradientSegments[crash], GetRoofAttributes[crash], GetSheetLayerUserOrigin[crash], GetSingularConstraint[crash], GetVPLrOvrdFillBack[crash], GetVPLrOvrdFillFore[crash], GetVPLrOvrdOpty[crash], GetVPLrOvrdPenBack[crash], GetVPLrOvrdPenFore[crash], GetWallThickness[crash], HasConstraint[crash], InsertGradientData[crash], InsertGradientSegment[crash], LDevice_AddAccessory[crash], LDevice_DeleteAcc[crash], LDevice_GetAccCount[crash], LDevice_GetAccPos2D[crash], LDevice_GetAccPos3D[crash], LDevice_GetCellCount[crash], LDevice_GetParamBool[crash], LDevice_GetParamLong[crash], LDevice_GetParamReal[crash], LDevice_GetParamStr[crash], LDevice_ResetVisual[crash], LDevice_SetAccCell[crash], LDevice_SetParamBool[crash], LDevice_SetParamLong[crash], LDevice_SetParamReal[crash], LDevice_SetParamStr[crash], OLDGetHangingPos[crash], Ord[crash], RemoveGradientSegment[crash], RemoveVPLrOvrd[crash], SetDefOpacityByClsN[crash], SetDisplayWith2DComp[crash], SetDropShadowByCls[crash], SetGradientData[crash], SetGradientDataN[crash], SetGradientMidpointPosition[crash], SetGradientOpacity[crash], SetGradientSpotColor[crash], SetGradientSpotPosition[crash], SetLayerElevation[crash], SetLayerElevationN[crash], SetLightDirection[crash], SetRoofAttributes[crash], SetSheetLayerUserOrigin[crash], SetSpreadAngle[crash], SetTexMapRealN[crash], TrueTypeToPoly[crash]

@@ -1,0 +1,28 @@
+{
+  "name": "vw-mcp",
+  "version": "0.0.0",
+  "description": "MCP server for Vectorworks (relay). Work in progress.",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stevenmorgan94/vw-mcp.git",
+    "directory": "relay"
+  },
+  "bin": {
+    "vw-mcp": "server.mjs"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check server.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "express": "^4.21.2",
+    "ws": "^8.18.0",
+    "zod": "^3.23.8"
+  }
+}

@@ -1,0 +1,3 @@
+// Copy to Local.xcconfig (gitignored) to set machine-specific values for builds from the Xcode app.
+// VW_SDK_DIR = /path/to/VectorworksSDK/SDK2027
+// VW_YEAR = 2027
