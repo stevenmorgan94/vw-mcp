@@ -126,8 +126,19 @@ const asText = (value) => ({
 });
 const asError = (message) => ({ content: [{ type: 'text', text: message }], isError: true });
 
+// Sent to the client at connect, so the AI gets the house rules without the user pasting them.
+// Keep in step with PROMPT in plugin/palette/index.html and the README.
+const INSTRUCTIONS = `You can control Vectorworks through the vw-mcp tools.
+- Call vw_bridge_status first. If documentOpen is false, ask the user to open a drawing.
+- Run Python with execute_script (the vs module is available). print() JSON to return data.
+- Every vs.* call is safety-checked. A refusal comes back as an error with a reason and advice. Don't retry a refused call; use the alternative it names.
+- Use vw_lookup_function before calling an unfamiliar vs.* function.
+- After changing a plug-in object's attributes (fill, pen, class) or parameters, call vs.ResetObject(h) on it, or its 2D/3D keeps the old look. The rebuild happens after the job ends, so check the result in a new execute_script call.
+- Only set allowUnclassified or allowDocumentLevel if the user asks.
+- Each job is one undo step in Vectorworks.`;
+
 function buildMcpServer() {
-  const mcp = new McpServer({ name: 'vw-mcp', version: RELAY_VERSION });
+  const mcp = new McpServer({ name: 'vw-mcp', version: RELAY_VERSION }, { instructions: INSTRUCTIONS });
 
   // Submit a job to the plug-in (it runs on a clean main-loop pass) and long-poll for its result.
   async function runJob(params, timeoutSec) {
@@ -174,7 +185,8 @@ function buildMcpServer() {
     'before they run, handle arguments are checked for the right object type, and Begin*/End* calls ' +
     'must pair up. A refusal returns isError with {refused, function, class, reason, alternative, ' +
     'partialChanges, advice}. Each job is one undo step and runs on a clean main-loop pass. Use ' +
-    'vw_lookup_function to check a function first.',
+    'vw_lookup_function to check a function first. After changing a plug-in object\'s attributes or ' +
+    'parameters, call vs.ResetObject(h); it rebuilds after the job ends, so read the result back in a new call.',
     {
       code: z.string().describe('Python source. `import vs` is optional (vs is predefined).'),
       lang: z.enum(['python', 'ops']).optional()

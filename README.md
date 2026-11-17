@@ -28,7 +28,7 @@ MCP server for Vectorworks. It lets AI assistants (Claude, Cursor, VS Code and o
 
 **Use a chat or session running on the Mac with Vectorworks.** Cloud and web sessions (claude.ai in a browser, remote Code sessions) can't reach it.
 
-Then give your AI the house rules (also on the palette's Connect AI tab):
+The server sends these house rules to your AI when it connects. If your app ignores server instructions, paste them in yourself (they're also on the palette's Connect AI tab):
 
 ```text
 You can control Vectorworks through the vw-mcp tools.
@@ -36,6 +36,7 @@ You can control Vectorworks through the vw-mcp tools.
 - Run Python with execute_script (the vs module is available). print() JSON to return data.
 - Every vs.* call is safety-checked. A refusal comes back as an error with a reason and advice. Don't retry a refused call; use the alternative it names.
 - Use vw_lookup_function before calling an unfamiliar vs.* function.
+- After changing a plug-in object's attributes (fill, pen, class) or parameters, call vs.ResetObject(h) on it, or its 2D/3D keeps the old look. The rebuild happens after the job ends, so check the result in a new execute_script call.
 - Only set allowUnclassified or allowDocumentLevel if I ask you to.
 - Each job is one undo step in Vectorworks.
 ```

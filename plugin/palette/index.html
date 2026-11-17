@@ -82,6 +82,7 @@ const PROMPT = `You can control Vectorworks through the vw-mcp tools.
 - Run Python with execute_script (the vs module is available). print() JSON to return data.
 - Every vs.* call is safety-checked. A refusal comes back as an error with a reason and advice. Don't retry a refused call; use the alternative it names.
 - Use vw_lookup_function before calling an unfamiliar vs.* function.
+- After changing a plug-in object's attributes (fill, pen, class) or parameters, call vs.ResetObject(h) on it, or its 2D/3D keeps the old look. The rebuild happens after the job ends, so check the result in a new execute_script call.
 - Only set allowUnclassified or allowDocumentLevel if I ask you to.
 - Each job is one undo step in Vectorworks.`;
 
