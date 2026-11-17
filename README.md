@@ -22,9 +22,11 @@ MCP server for Vectorworks. It lets AI assistants (Claude, Cursor, VS Code and o
 
 | App | Setup |
 |---|---|
-| **Claude Desktop** | Download `vw-mcp.mcpb` from the [latest release](https://github.com/stevenmorgan94/vw-mcp/releases/latest) and double-click it. |
-| **Claude Code** | `claude mcp add vw-mcp -- npx -y vw-mcp` |
-| **Cursor, VS Code, others** | Add an MCP server: `{ "mcpServers": { "vw-mcp": { "command": "npx", "args": ["-y", "vw-mcp"] } } }` (needs [Node.js](https://nodejs.org) 20+) |
+| **Claude Desktop** | Download `vw-mcp.mcpb` from the [latest release](https://github.com/stevenmorgan94/vw-mcp/releases/latest) and double-click it. Then quit Claude fully (⌘Q) and reopen it. No Node.js needed. |
+| **Claude Code** | In Terminal on this Mac: `claude mcp add vw-mcp -- npx -y vw-mcp`, then start a new session (needs [Node.js](https://nodejs.org) 20+). |
+| **Cursor, VS Code, others** | Add an MCP server: `{ "mcpServers": { "vw-mcp": { "command": "npx", "args": ["-y", "vw-mcp"] } } }` (needs [Node.js](https://nodejs.org) 20+). |
+
+**Use a chat or session running on the Mac with Vectorworks.** Cloud and web sessions (claude.ai in a browser, remote Code sessions) can't reach it.
 
 Then give your AI the house rules (also on the palette's Connect AI tab):
 
@@ -54,6 +56,8 @@ A refused call returns an error with `{refused, function, class, reason, alterna
 | Symptom | Fix |
 |---|---|
 | "Vectorworks with the vw-mcp plug-in is not running" | Start Vectorworks. If it's running, check the plug-in is in the Plug-ins folder and enabled (*Tools › Plug-ins › Plug-in Manager › Third-party Plug-ins*), then restart Vectorworks. |
+| Your AI says it has no Vectorworks tools | It's a cloud or web session: use one running on this Mac. For Claude Desktop, quit it fully (⌘Q) and reopen after installing. |
+| The MCP server won't start in Cursor, VS Code or another app | The app can't find Node (common when Node is installed with nvm). Replace `"npx"` with the full path that `which npx` prints in Terminal. |
 | No **Help › vw-mcp Status…** item | The plug-in isn't loaded: same fix as above. |
 | Status says "Bridge not running" | Ports 47823–47830 are all in use. Quit whatever uses them and restart Vectorworks. |
 | "Vectorworks is busy (a dialog is open)" | Close the open dialog in Vectorworks, then retry. |
