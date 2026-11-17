@@ -13,7 +13,7 @@ import sys
 import threading
 import types
 
-VERSION = 6
+VERSION = 7
 MARKER = '\x1eVWGUARD '
 REFUSE_CLASSES = ('crasher', 'hang', 'interactive', 'event-only')
 REASONS = {
@@ -46,6 +46,22 @@ def load(table_json, override_json=None):
     _meta = {k: t.get(k) for k in ('vwBuild', 'engine', 'source', 'schema')}
     _meta['functions'] = len(fns)
     _meta['overrides'] = sum(1 for e in fns.values() if e.get('overridden'))
+
+
+# ---- plug-in objects to rebuild after the job (#25) ----------------------------------
+# A plug-in object (PIO) changed by a script keeps its old 2D/3D until vs.ResetObject, and a reset
+# in the job that created it does nothing. The guard records every PIO a job creates or passes to a
+# call that may change it; the bridge resets them once the script has finished.
+PIO_TYPE = 86
+MAX_TOUCHED = 2000      # ~15 ms each to rebuild: about 30 s at the cap
+# Calls that only read: a PIO passed to or returned by these is not recorded.
+READ_PREFIXES = ('Get', 'Is', 'Num', 'Count', 'Find', 'Has', 'Eval', 'Next', 'Prev', 'FIn', 'LIn',
+                 'FS', 'LS', 'FAct', 'LAct', 'FLayer', 'LLayer', 'LNewObj', 'ActLayer', 'Obj', 'ForEach',
+                 'Calc', 'Search', 'ResetObject')
+
+
+def _is_reader(name):
+    return name.startswith(READ_PREFIXES)
 
 
 class Refused(Exception):
@@ -150,6 +166,22 @@ class _Job:
         self.open = []          # stack of open Begin* names
         self.auto_closed = []
         self.cache = {}
+        self.touched = {}       # uuid -> None, insertion-ordered: PIOs to reset after the job
+        self.touched_over = 0   # PIOs past MAX_TOUCHED, not reset
+
+    def touch(self, h):
+        if not _is_handle(h):
+            return
+        try:
+            if self.real.GetTypeN(h) == PIO_TYPE:
+                u = self.real.GetObjectUuid(h)
+                if u and u not in self.touched:
+                    if len(self.touched) >= MAX_TOUCHED:
+                        self.touched_over += 1
+                    else:
+                        self.touched[u] = None
+        except Exception:
+            pass
 
     def wrap(self, name, fn):
         w = self.cache.get(name)
@@ -188,7 +220,13 @@ class _Job:
                     job.refusals.append(body)
                     raise Refused(body)
             job.calls += 1
+            track = not _is_reader(name)
+            if track:   # before the call: a handle may be gone after it (DelObject)
+                for a in args:
+                    job.touch(a)
             r = fn(*args, **kwargs)
+            if track:
+                job.touch(r)
             if name in _pairs:
                 job.open.append(name)
             elif name in _ends:
@@ -313,6 +351,10 @@ def run(code, opts):
         sys.modules['vs'] = saved
         job.close_open()
         report['calls'] = job.calls
+        if job.touched:
+            report['touchedPio'] = list(job.touched)
+        if job.touched_over:
+            report['touchedPioSkipped'] = job.touched_over
         if job.refusals:
             report['refusal'] = job.refusals[0]
             if len(job.refusals) > 1:

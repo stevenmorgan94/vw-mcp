@@ -56,6 +56,12 @@ def category_class(f):
     if re.match(r'(Dialogs|User Interactive)', f['category']) or f['event_context'] == 'dialog-handler': return 'interactive'
     if f['event_context'] or re.match(r'(Object|Tool) Events', f['category']): return 'event-only'
     return None
+# Found live after the sweep: the sweep's document already had the object's preferences set.
+MANUAL = {
+    'CreateCustomObject': {'class': 'interactive', 'basis': 'live',
+        'alternative': "vs.CreateCustomObjectN(name, pt, rot, False): False skips the Object Preferences dialog "
+                       "that opens the first time a plug-in object is placed in a drawing"},
+}
 ALTERNATIVES = {
     'UprString': "Python's str.upper()",
     'Ord': "Python's ord()",
@@ -153,6 +159,8 @@ def main():
         c = category_class(f)
         if c: out[name] = {'class': c, 'basis': 'category'}
     isdk, isdk_total = isdk_classes(out, fns)
+    for name, e in MANUAL.items():   # after the ISDK step: these are about the vs.* wrapper, not the SDK call
+        out[name] = dict(e)
     table = {
         'schema': 1,
         'vwBuild': ct.get('vwBuild'),

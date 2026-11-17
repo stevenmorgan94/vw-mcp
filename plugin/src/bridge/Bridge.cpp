@@ -115,6 +115,7 @@ namespace Bridge
         }
         if (r.contains("guard") && r["guard"].contains("calls")) a["calls"] = r["guard"]["calls"];
         if (r.contains("guard") && r["guard"].contains("timeout")) a["timeout"] = true;
+        if (r.contains("autoReset")) a["autoReset"] = r["autoReset"];
         std::string err = r.value("error", "");
         if (!err.empty()) a["error"] = err.substr(0, 200);
         gActivity.push_front(a);
@@ -251,6 +252,7 @@ namespace Bridge
             return SendJson(res, Refusal("language", "Only Python is supported: the safety layer can't see inside VectorScript."));
         for (const char* k : { "allowDocumentLevel", "allowUnclassified" })
             j.req.opts[k] = a.contains(k) && a[k].is_boolean() && a[k].get<bool>();
+        j.req.opts["autoReset"] = !(a.contains("autoReset") && a["autoReset"].is_boolean() && !a["autoReset"].get<bool>());
         double timeoutSec = 30.0;
         if (a.contains("timeoutSec") && a["timeoutSec"].is_number())
             timeoutSec = std::clamp(a["timeoutSec"].get<double>(), 1.0, 300.0);

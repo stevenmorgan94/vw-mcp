@@ -675,7 +675,9 @@
 "class": "interactive"
 },
 "CreateCustomObject": {
-"class": "safe"
+"alternative": "vs.CreateCustomObjectN(name, pt, rot, False): False skips the Object Preferences dialog that opens the first time a plug-in object is placed in a drawing",
+"basis": "live",
+"class": "interactive"
 },
 "CreateCustomObjectN": {
 "class": "safe"
