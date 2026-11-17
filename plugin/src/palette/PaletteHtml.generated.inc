@@ -55,6 +55,7 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 .log code { font-family: var(--mono) }
 .pill { display: inline-block; font-size: 10.5px; padding: 0 6px; border-radius: 999px; border: 1px solid currentColor; margin-left: 4px }
 .empty { color: var(--muted); padding: 12px 0 }
+.beta { font-size: 11px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 8px; margin-top: 2px }
 </style>
 </head>
 <body>
@@ -68,11 +69,14 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 <script>
 'use strict';
 const CLIENTS = {
-  code: { name: 'Claude Code', how: 'Run this once in a terminal:', code: 'claude mcp add vw-mcp -- npx -y vw-mcp' },
-  desktop: { name: 'Claude Desktop', how: 'Add this to claude_desktop_config.json (Settings › Developer › Edit Config), then restart Claude Desktop. Needs Node.js 20+.',
-    code: '{\n  "mcpServers": {\n    "vw-mcp": { "command": "npx", "args": ["-y", "vw-mcp"] }\n  }\n}' },
+  code: { name: 'Claude Code', how: 'Run this once in Terminal on this Mac. Needs Node.js 20+.', code: 'claude mcp add vw-mcp -- npx -y vw-mcp',
+    after: 'Then start a new Claude Code session.' },
+  desktop: { name: 'Claude Desktop', how: 'Download vw-mcp.mcpb from the release page (address below) and double-click it. Claude Desktop installs it; no Node.js needed.',
+    code: 'https://github.com/stevenmorgan94/vw-mcp/releases/latest',
+    after: 'Then quit Claude fully (⌘Q) and reopen it.' },
   other: { name: 'Cursor / VS Code / other', how: 'Add this to your client’s MCP settings. Needs Node.js 20+.',
-    code: '{\n  "mcpServers": {\n    "vw-mcp": { "command": "npx", "args": ["-y", "vw-mcp"] }\n  }\n}' },
+    code: '{\n  "mcpServers": {\n    "vw-mcp": { "command": "npx", "args": ["-y", "vw-mcp"] }\n  }\n}',
+    after: 'If the server won’t start, replace "npx" with the full path that `which npx` prints in Terminal.' },
 };
 const PROMPT = `You can control Vectorworks through the vw-mcp tools.
 - Call vw_bridge_status first. If documentOpen is false, ask me to open a drawing.
@@ -124,11 +128,14 @@ function render() {
       <dt>Vectorworks</dt><dd class="${st.tableBuild && st.vwBuild !== st.tableBuild ? 't-warn' : ''}">${esc(st.vwBuild || 'unknown')}</dd>
       <dt>Safety table</dt><dd>${esc(st.tableBuild || '?')} · ${(st.tableFunctions || 0).toLocaleString()} functions</dd>
       <dt>Plug-in</dt><dd>vw-mcp ${esc(st.pluginVersion)} · guard ${esc(st.guardVersion)}</dd></dl>`;
+    h += `<p class="beta">Beta: test on copies of your drawings. Every AI job is one undo step (Edit › Undo).</p>`;
   } else if (tab === 'connect') {
     const k = CLIENTS[client];
     h += `<label class="label" for="client">Your AI app</label>
       <select id="client">${Object.entries(CLIENTS).map(([key, v]) => `<option value="${key}"${key === client ? ' selected' : ''}>${v.name}</option>`).join('')}</select>
       <p class="note">${esc(k.how)}</p>${copyBlock('snip', k.code)}
+      <p class="note">${esc(k.after)}</p>
+      <p class="note"><strong>Use a chat or session running on this Mac.</strong> Cloud and web sessions (claude.ai in a browser, remote Code sessions) can’t reach Vectorworks.</p>
       <span class="label">Tell your AI</span>
       <p class="note">Paste this into your AI’s instructions or the start of a chat.</p>${copyBlock('prompt', PROMPT)}`;
   } else {

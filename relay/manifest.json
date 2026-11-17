@@ -1,0 +1,59 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/mcpb/main/schemas/mcpb-manifest-v0.3.schema.json",
+  "manifest_version": "0.3",
+  "name": "vw-mcp",
+  "display_name": "vw-mcp (MCP server for Vectorworks)",
+  "version": "0.1.0",
+  "description": "Lets Claude script Vectorworks through the vw-mcp plug-in. Every call is safety-checked.",
+  "long_description": "Requires the vw-mcp plug-in installed and enabled in Vectorworks 2027 (macOS). The plug-in starts with Vectorworks; this extension finds it automatically. Calls that crash, hang or open dialogs are refused before they run, and each job is one undo step. Beta: test on copies of your drawings.",
+  "author": {
+    "name": "Steven Morgan"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stevenmorgan94/vw-mcp"
+  },
+  "homepage": "https://github.com/stevenmorgan94/vw-mcp",
+  "support": "https://github.com/stevenmorgan94/vw-mcp/issues",
+  "license": "MIT",
+  "server": {
+    "type": "node",
+    "entry_point": "server.mjs",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/server.mjs"
+      ]
+    }
+  },
+  "tools": [
+    {
+      "name": "vw_bridge_status",
+      "description": "Check the connection to Vectorworks and the safety table in use."
+    },
+    {
+      "name": "execute_script",
+      "description": "Run safety-checked Python inside the open Vectorworks document."
+    },
+    {
+      "name": "run_native_op",
+      "description": "Change the document through native SDK calls instead of Python."
+    },
+    {
+      "name": "vw_lookup_function",
+      "description": "Look up a vs.* function's safety class, checks and signature."
+    }
+  ],
+  "keywords": [
+    "vectorworks",
+    "cad"
+  ],
+  "compatibility": {
+    "platforms": [
+      "darwin"
+    ],
+    "runtimes": {
+      "node": ">=20"
+    }
+  }
+}

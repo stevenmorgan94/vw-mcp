@@ -1,7 +1,7 @@
 {
   "name": "vw-mcp",
   "version": "0.1.0",
-  "description": "MCP server for Vectorworks (relay). Work in progress.",
+  "description": "MCP server for Vectorworks: lets AI assistants script Vectorworks through the vw-mcp plug-in, with every call safety-checked.",
   "license": "MIT",
   "type": "module",
   "repository": {
@@ -23,5 +23,23 @@
     "@modelcontextprotocol/sdk": "^1.12.0",
     "express": "^4.21.2",
     "zod": "^3.23.8"
-  }
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "vectorworks",
+    "cad",
+    "ai"
+  ],
+  "homepage": "https://github.com/stevenmorgan94/vw-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/stevenmorgan94/vw-mcp/issues"
+  },
+  "files": [
+    "server.mjs",
+    "README.md"
+  ],
+  "os": [
+    "darwin"
+  ]
 }

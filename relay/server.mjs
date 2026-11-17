@@ -40,34 +40,30 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const log = (...a) => console.error('[vw-mcp]', ...a);
 
-// The vs safety table the bridge enforces (built by safety/build_table.py), for vw_lookup_function.
-// It lives in the repo's safety/ folder; VW_MCP_SAFETY_DIR overrides that (e.g. for a packaged relay).
+// The safety table and vs.* signatures come from the running plug-in (GET /safety-table, /signatures),
+// so vw_lookup_function always matches what that plug-in enforces (#17). Cached per plug-in instance.
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SAFETY_DIR = process.env.VW_MCP_SAFETY_DIR || path.join(HERE, '..', 'safety');
-let safetyTable = null, signatures = null;
-function loadSafety() {
-  if (safetyTable) return;
-  try { safetyTable = JSON.parse(fs.readFileSync(path.join(SAFETY_DIR, 'vs-safety-table.json'), 'utf8')); }
-  catch (e) { safetyTable = { functions: {}, error: String(e.message || e) }; }
-  signatures = {};
-  try {
-    const rows = parseCSV(fs.readFileSync(path.join(SAFETY_DIR, 'functions.csv'), 'utf8'));
-    for (const r of rows) signatures[r.name] = { python: r.python_signature, vectorscript: r.vectorscript_signature };
-  } catch { /* signatures are optional */ }
-}
-function parseCSV(text) {
-  const rows = []; let row = [], f = '', q = false;
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (q) { if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
-    else if (c === '"') q = true;
-    else if (c === ',') { row.push(f); f = ''; }
-    else if (c === '\n') { row.push(f); rows.push(row); row = []; f = ''; }
-    else if (c !== '\r') f += c;
+const RELAY_VERSION = JSON.parse(fs.readFileSync(path.join(HERE, 'package.json'), 'utf8')).version;
+let safetyCache = { key: null, table: null, signatures: null };
+async function loadSafety() {
+  const inst = pickInstance();
+  if (!inst) throw new Error(NOT_RUNNING);
+  const key = `${inst.pid}:${inst.pluginVersion}`;
+  if (safetyCache.key !== key) {
+    const [table, signatures] = await Promise.all([
+      plugin('GET', '/safety-table', null, 10000), plugin('GET', '/signatures', null, 10000)]);
+    if (!table?.functions) throw new Error('The vw-mcp plug-in did not return its safety table (it may be older than this relay).');
+    safetyCache = { key, table, signatures: signatures?.ok === false ? {} : (signatures || {}) };
   }
-  if (f || row.length) { row.push(f); rows.push(row); }
-  const [h, ...rest] = rows;
-  return rest.filter((r) => r.length === h.length).map((r) => Object.fromEntries(h.map((k, i) => [k, r[i]])));
+  return safetyCache;
+}
+// Plug-in and relay come from one release (#17): a difference beyond patch level is worth a warning.
+function versionWarning(pluginVersion) {
+  if (!pluginVersion) return null;
+  const mm = (v) => String(v).split('.').slice(0, 2).join('.');
+  return mm(pluginVersion) === mm(RELAY_VERSION) ? null
+    : `The vw-mcp plug-in is ${pluginVersion} but this relay is ${RELAY_VERSION}. Install the matching versions ` +
+      'from the same release (plug-in zip and relay).';
 }
 let lastEvent = null;   // last refusal / timeout / unresponsive, for vw_bridge_status
 
@@ -131,7 +127,7 @@ const asText = (value) => ({
 const asError = (message) => ({ content: [{ type: 'text', text: message }], isError: true });
 
 function buildMcpServer() {
-  const mcp = new McpServer({ name: 'vw-mcp', version: '0.1.0' });
+  const mcp = new McpServer({ name: 'vw-mcp', version: RELAY_VERSION });
 
   // Submit a job to the plug-in (it runs on a clean main-loop pass) and long-poll for its result.
   async function runJob(params, timeoutSec) {
@@ -231,7 +227,9 @@ function buildMcpServer() {
     'event-only, document-level or unclassified), the argument checks applied, its signature and any alternative. Read-only.',
     { name: z.string().describe('Function name, with or without "vs." (case-insensitive).') },
     async ({ name }) => {
-      loadSafety();
+      let safetyTable, signatures;
+      try { ({ table: safetyTable, signatures } = await loadSafety()); }
+      catch (e) { return asError(e.message || String(e)); }
       const n = name.replace(/^vs\./, '');
       const fns = safetyTable.functions;
       const key = fns[n] ? n : Object.keys(fns).find((k) => k.toLowerCase() === n.toLowerCase())
@@ -244,7 +242,7 @@ function buildMcpServer() {
         argCheck: e?.args ? e.args.map(([arg, kind, rule]) => ({ arg, kind, ...(rule ? { objectType: rule } : {}) })) : null,
         rerouted: e?.reroute ? `runs as ${e.reroute === 'upper' ? 'str.upper()' : e.reroute}` : null,
         alternative: e?.alternative ?? null,
-        signature: signatures[key] ?? null,
+        signature: signatures[key] ? { python: signatures[key][0], vectorscript: signatures[key][1] } : null,
         allowedByDefault: !!e && (e.class === 'safe' || !!e.reroute),
         needs: !e ? 'allowUnclassified: true' : e.class === 'document-level' ? 'allowDocumentLevel: true' : null,
         nativeCall: (() => {   // run_native_op "call" with the ISDK method of the same name
@@ -263,13 +261,13 @@ function buildMcpServer() {
     'different build), and the last refusal or timeout. Call this first.',
     {},
     async () => {
-      loadSafety();
       clientName = mcp.server.getClientVersion()?.name || clientName;
       const inst = pickInstance();
       let info = null, error = null;
       if (inst) info = await plugin('GET', '/status', null, 5000).catch((e) => { error = e.message; return null; });
       else error = NOT_RUNNING;
-      const mismatch = info && safetyTable.vwBuild && info.vwBuild !== safetyTable.vwBuild;
+      const tableBuild = info?.tableBuild ?? null;
+      const mismatch = info && tableBuild && info.vwBuild !== tableBuild;
       return asText({
         connected: !!info?.ok,
         vwBuild: info?.vwBuild ?? inst?.vwBuild ?? null,
@@ -279,11 +277,12 @@ function buildMcpServer() {
         sweepMode: info?.sweepMode ?? null,
         guardVersion: info?.guardVersion ?? null,
         plugin: info ? { version: info.pluginVersion, port: info.port, pid: info.pid } : null,
+        relayVersion: RELAY_VERSION,
         otherInstances: findInstances().filter((d) => d.pid !== inst?.pid).map((d) => ({ pid: d.pid, vwBuild: d.vwBuild })),
-        safetyTable: { vwBuild: safetyTable.vwBuild, source: safetyTable.source,
-          functions: Object.keys(safetyTable.functions).length, error: safetyTable.error },
-        warning: mismatch ? `Vectorworks is ${info.vwBuild} but the safety table was swept on ${safetyTable.vwBuild}. ` +
+        safetyTable: info ? { vwBuild: tableBuild, functions: info.tableFunctions } : null,
+        warning: [mismatch ? `Vectorworks is ${info.vwBuild} but the safety table was swept on ${tableBuild}. ` +
           'Classes carry forward, but a function that changed in this build may behave differently; re-run the sweep.' : null,
+          versionWarning(info?.pluginVersion)].filter(Boolean).join(' ') || null,
         error,
         lastEvent,
       });
