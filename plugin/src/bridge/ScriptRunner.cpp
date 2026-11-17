@@ -20,7 +20,7 @@
 
 namespace VwMcp
 {
-    const int kGuardVersion = 6;
+    const int kGuardVersion = 7;
 
     static std::string gDataFolder;
     static std::string gVwBuild;
@@ -156,6 +156,42 @@ namespace VwMcp
         }
     }
 
+    // The guard's report line from raw stdout (without removing it), or null.
+    static nlohmann::json PeekGuardReport(const std::string& out)
+    {
+        size_t at = out.rfind(kGuardMarker);
+        if (at == std::string::npos) return nullptr;
+        size_t mlen = std::strlen(kGuardMarker);
+        size_t end = out.find('\n', at);
+        nlohmann::json rep = nlohmann::json::parse(out.substr(at + mlen, end == std::string::npos ? std::string::npos : end - at - mlen), nullptr, false);
+        return rep.is_discarded() ? nlohmann::json(nullptr) : rep;
+    }
+
+    // Rebuild the plug-in objects the job created or changed (#25). Runs after the job's script has
+    // finished, in its own script context, inside the job's undo event: a ResetObject inside the
+    // script that created the object leaves it with its creation-time look.
+    static nlohmann::json ResetTouchedPio(VectorWorks::Scripting::IPythonScriptEngine* pyEngine, const nlohmann::json& uuids)
+    {
+        std::string code =
+            "import vs, json\n"
+            "n = 0\n"
+            "for u in json.loads(" + PyStr(uuids.dump()) + "):\n"
+            "    h = vs.GetObjectByUuid(u)\n"
+            "    if h and vs.GetTypeN(h) == 86:\n"
+            "        vs.ResetObject(h)\n"
+            "        n += 1\n"
+            "print(n)\n";
+        VectorWorks::Scripting::CDefaultPythonLogger logger;
+        TXString pyText(code.c_str());
+        VCOMError err = pyEngine->ScriptContext_Begin(pyText, &logger);
+        if (err == kVCOMError_NoError)
+            err = pyEngine->ScriptContext_RunEx(&logger);
+        std::string out(logger.fOutput.operator const char*());
+        if (err != kVCOMError_NoError || !logger.fErrors.IsEmpty())
+            return { { "error", std::string(logger.fErrors.operator const char*()) }, { "vcomError", (int)err } };
+        return std::atoi(out.c_str());
+    }
+
     static nlohmann::json RunPython(const JobRequest& job)
     {
         using namespace VectorWorks::Scripting;
@@ -171,6 +207,7 @@ namespace VwMcp
         const bool guarded = !SweepMode();
         TXString pyText((guarded ? BuildGuardedPython(job.code, job.opts) : job.code).c_str());
         VCOMError err;
+        nlohmann::json autoReset;     // null: nothing to reset
         {
             ScriptDialogGuard guard;
             UndoEventScope undoScope("MCP Script");
@@ -179,6 +216,12 @@ namespace VwMcp
             err = pyEngine->ScriptContext_Begin(pyText, &logger);
             if (err == kVCOMError_NoError)
                 err = pyEngine->ScriptContext_RunEx(&logger);
+            if (guarded && job.opts.value("autoReset", true))
+            {
+                nlohmann::json rep = PeekGuardReport(std::string(logger.fOutput.operator const char*()));
+                if (rep.is_object() && rep.contains("touchedPio") && rep["touchedPio"].is_array() && !rep["touchedPio"].empty())
+                    autoReset = ResetTouchedPio(pyEngine, rep["touchedPio"]);
+            }
         }
         result["ok"] = (err == kVCOMError_NoError) && logger.fErrors.IsEmpty();
         result["vcomError"] = (int)err;
@@ -189,6 +232,17 @@ namespace VwMcp
         result["guarded"] = guarded;
         if (guarded)
             ApplyGuardReport(result);
+        if (!autoReset.is_null() && autoReset != 0)
+            result["autoReset"] = autoReset;
+        if (result.contains("guard") && result["guard"].is_object() && result["guard"].contains("touchedPioSkipped"))
+        {
+            result["autoResetSkipped"] = result["guard"]["touchedPioSkipped"];
+            result["autoResetAdvice"] = "More plug-in objects changed than are rebuilt automatically (2000). "
+                                        "Call vs.ResetObject on the rest in later execute_script calls.";
+            result["guard"].erase("touchedPioSkipped");
+        }
+        if (result.contains("guard") && result["guard"].is_object())
+            result["guard"].erase("touchedPio");
         return result;
     }
 

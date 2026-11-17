@@ -36,7 +36,9 @@ You can control Vectorworks through the vw-mcp tools.
 - Run Python with execute_script (the vs module is available). print() JSON to return data.
 - Every vs.* call is safety-checked. A refusal comes back as an error with a reason and advice. Don't retry a refused call; use the alternative it names.
 - Use vw_lookup_function before calling an unfamiliar vs.* function.
-- Plug-in objects (Stage Deck, lighting devices, …) only redraw with new attributes (fill, pen, class) or parameters after vs.ResetObject(h), and ResetObject does nothing in the same job that created the object. So create or change them in one execute_script call, call vs.ResetObject on them in a second call (find them by name or with vs.ForEachObject), and check the result in a third.
+- Plug-in objects (Stage Deck, lighting devices, …) that a job creates or changes are rebuilt automatically when it finishes (autoReset in the result), so their 2D/3D shows the new attributes and parameters. A vs.ResetObject inside the creating script does nothing; check the result in a new call.
+- Create plug-in objects with vs.CreateCustomObjectN(name, pt, rot, False): False skips the Object Preferences dialog.
+- A solid fill (vs.SetFPat(h, 1)) paints with the background colour: set vs.SetFillBack as well as vs.SetFillFore.
 - Only set allowUnclassified or allowDocumentLevel if I ask you to.
 - Each job is one undo step in Vectorworks.
 ```

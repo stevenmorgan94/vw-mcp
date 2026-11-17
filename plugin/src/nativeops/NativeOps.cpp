@@ -129,8 +129,44 @@ static nlohmann::json UnresolvedHandleArg( const std::string& fn, const nlohmann
 	return nullptr;
 }
 
+// ---- plug-in objects to rebuild after the ops (#25) ----------------------------------------
+// Same rule as the Python guard: every plug-in object a call creates or is handed (except calls
+// that only read) is recorded by UUID and reset once the op list has finished.
+static std::vector<TXString> gTouchedPio;
+
+static bool IsReaderFn( const std::string& fn )
+{
+	static const char* kReaders[] = { "Get", "Is", "Num", "Count", "Find", "Has", "Eval", "Next", "Prev",
+	                                  "First", "Last", "Search", "Calc", "ForEach", "ResetObject" };
+	for ( const char* p : kReaders )
+		if ( fn.rfind( p, 0 ) == 0 ) return true;
+	return false;
+}
+
+static void TouchPio( MCObjectHandle h )
+{
+	if ( !h || gTouchedPio.size() >= 2000 || gSDK->GetObjectTypeN( h ) != kParametricNode ) return;
+	TXString u;
+	if ( gSDK->GetObjectUuid( h, u ) && std::find( gTouchedPio.begin(), gTouchedPio.end(), u ) == gTouchedPio.end() )
+		gTouchedPio.push_back( u );
+}
+
+static void ApplyAutoReset( nlohmann::json& result, const nlohmann::json& opts )
+{
+	int n = 0;
+	if ( opts.value( "autoReset", true ) )
+		for ( const TXString& u : gTouchedPio )
+		{
+			MCObjectHandle h = gSDK->GetObjectByUuid( u );
+			if ( h && gSDK->GetObjectTypeN( h ) == kParametricNode ) { gSDK->ResetObject( h ); ++n; }
+		}
+	gTouchedPio.clear();
+	if ( n ) result["autoReset"] = n;
+}
+
 nlohmann::json RunNativeOps( const std::string& opsJson, const nlohmann::json& opts )
 {
+	gTouchedPio.clear();
 	nlohmann::json result;
 	nlohmann::json ops;
 	try { ops = nlohmann::json::parse( opsJson ); }
@@ -177,9 +213,20 @@ nlohmann::json RunNativeOps( const std::string& opsJson, const nlohmann::json& o
 					if ( !created.empty() )
 						refusal["advice"] = ( refusal.value( "advice", std::string() ) + " Earlier ops in this list already ran; Edit > Undo reverts the whole job in one step." );
 					refusal["created"] = created;
+					ApplyAutoReset( refusal, opts );
 					return refusal;
 				}
-				created.push_back( DispatchIsdkCall( fn, args, asId ) );
+				const bool track = !IsReaderFn( fn );
+				if ( track && args.is_array() )
+					for ( const auto& a : args )   // before the call: the object may be gone after it
+						if ( a.is_object() && ( a.contains( "$h" ) || a.contains( "$name" ) ) ) TouchPio( ResolveHandle( a ) );
+				nlohmann::json r = DispatchIsdkCall( fn, args, asId );
+				if ( track && r.contains( "as" ) && r["as"].is_number_integer() )
+				{
+					auto it = gHandleReg.find( r["as"].get<int>() );
+					if ( it != gHandleReg.end() ) TouchPio( it->second );
+				}
+				created.push_back( r );
 				continue;
 			}
 
@@ -498,6 +545,7 @@ nlohmann::json RunNativeOps( const std::string& opsJson, const nlohmann::json& o
 	result["ok"]      = true;
 	result["lang"]    = "ops";
 	result["created"] = created;
+	ApplyAutoReset( result, opts );
 	return result;
 }
 

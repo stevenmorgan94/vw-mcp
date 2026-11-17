@@ -133,7 +133,9 @@ const INSTRUCTIONS = `You can control Vectorworks through the vw-mcp tools.
 - Run Python with execute_script (the vs module is available). print() JSON to return data.
 - Every vs.* call is safety-checked. A refusal comes back as an error with a reason and advice. Don't retry a refused call; use the alternative it names.
 - Use vw_lookup_function before calling an unfamiliar vs.* function.
-- Plug-in objects (Stage Deck, lighting devices, …) only redraw with new attributes (fill, pen, class) or parameters after vs.ResetObject(h), and ResetObject does nothing in the same job that created the object. So create or change them in one execute_script call, call vs.ResetObject on them in a second call (find them by name or with vs.ForEachObject), and check the result in a third.
+- Plug-in objects (Stage Deck, lighting devices, …) that a job creates or changes are rebuilt automatically when it finishes (autoReset in the result), so their 2D/3D shows the new attributes and parameters. A vs.ResetObject inside the creating script does nothing; check the result in a new call.
+- Create plug-in objects with vs.CreateCustomObjectN(name, pt, rot, False): False skips the Object Preferences dialog.
+- A solid fill (vs.SetFPat(h, 1)) paints with the background colour: set vs.SetFillBack as well as vs.SetFillFore.
 - Only set allowUnclassified or allowDocumentLevel if the user asks.
 - Each job is one undo step in Vectorworks.`;
 
@@ -185,8 +187,8 @@ function buildMcpServer() {
     'before they run, handle arguments are checked for the right object type, and Begin*/End* calls ' +
     'must pair up. A refusal returns isError with {refused, function, class, reason, alternative, ' +
     'partialChanges, advice}. Each job is one undo step and runs on a clean main-loop pass. Use ' +
-    'vw_lookup_function to check a function first. Plug-in objects only redraw with new attributes or ' +
-    'parameters after vs.ResetObject(h), and it does nothing in the job that created them: reset them in a separate, later call.',
+    'vw_lookup_function to check a function first. Plug-in objects the job creates or changes are rebuilt ' +
+    'automatically after it (vs.ResetObject inside the creating script does nothing); the result\'s autoReset counts them.',
     {
       code: z.string().describe('Python source. `import vs` is optional (vs is predefined).'),
       lang: z.enum(['python', 'ops']).optional()
@@ -197,12 +199,14 @@ function buildMcpServer() {
         .describe('Allow vs.* functions the safety table has no entry for (not yet tested). At your own risk.'),
       timeoutSec: z.number().optional()
         .describe('Script time budget in seconds (default 30, max 300). The script is interrupted when it runs out.'),
+      autoReset: z.boolean().optional()
+        .describe('Rebuild the plug-in objects this job creates or changes once it finishes (default true).'),
     },
-    async ({ code, lang, allowDocumentLevel, allowUnclassified, timeoutSec }) => {
+    async ({ code, lang, allowDocumentLevel, allowUnclassified, timeoutSec, autoReset }) => {
       const t = Math.min(Math.max(timeoutSec ?? 30, 1), 300);
       try {
         return toResult(await runJob({ code, lang: lang || 'python', allowDocumentLevel: !!allowDocumentLevel,
-          allowUnclassified: !!allowUnclassified, timeoutSec: t }, t));
+          allowUnclassified: !!allowUnclassified, timeoutSec: t, autoReset: autoReset !== false }, t));
       } catch (e) { return asError(e.message || String(e)); }
     },
   );
@@ -223,12 +227,14 @@ function buildMcpServer() {
         .describe('Allow "call" on ISDK methods with no safety class yet (no tested vs.* twin). At your own risk.'),
       allowDocumentLevel: z.boolean().optional()
         .describe('Allow "call" on methods that open, close or replace documents or windows.'),
+      autoReset: z.boolean().optional()
+        .describe('Rebuild the plug-in objects this job creates or changes once it finishes (default true).'),
     },
-    async ({ ops, allowUnclassified, allowDocumentLevel }) => {
+    async ({ ops, allowUnclassified, allowDocumentLevel, autoReset }) => {
       try {
         const code = typeof ops === 'string' ? ops : JSON.stringify(ops);
         return toResult(await runJob({ code, lang: 'ops', allowUnclassified: !!allowUnclassified,
-          allowDocumentLevel: !!allowDocumentLevel }, 30));
+          allowDocumentLevel: !!allowDocumentLevel, autoReset: autoReset !== false }, 30));
       } catch (e) { return asError(e.message || String(e)); }
     },
   );
