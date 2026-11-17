@@ -133,7 +133,7 @@ const INSTRUCTIONS = `You can control Vectorworks through the vw-mcp tools.
 - Run Python with execute_script (the vs module is available). print() JSON to return data.
 - Every vs.* call is safety-checked. A refusal comes back as an error with a reason and advice. Don't retry a refused call; use the alternative it names.
 - Use vw_lookup_function before calling an unfamiliar vs.* function.
-- After changing a plug-in object's attributes (fill, pen, class) or parameters, call vs.ResetObject(h) on it, or its 2D/3D keeps the old look. The rebuild happens after the job ends, so check the result in a new execute_script call.
+- Plug-in objects (Stage Deck, lighting devices, …) only redraw with new attributes (fill, pen, class) or parameters after vs.ResetObject(h), and ResetObject does nothing in the same job that created the object. So create or change them in one execute_script call, call vs.ResetObject on them in a second call (find them by name or with vs.ForEachObject), and check the result in a third.
 - Only set allowUnclassified or allowDocumentLevel if the user asks.
 - Each job is one undo step in Vectorworks.`;
 
@@ -185,8 +185,8 @@ function buildMcpServer() {
     'before they run, handle arguments are checked for the right object type, and Begin*/End* calls ' +
     'must pair up. A refusal returns isError with {refused, function, class, reason, alternative, ' +
     'partialChanges, advice}. Each job is one undo step and runs on a clean main-loop pass. Use ' +
-    'vw_lookup_function to check a function first. After changing a plug-in object\'s attributes or ' +
-    'parameters, call vs.ResetObject(h); it rebuilds after the job ends, so read the result back in a new call.',
+    'vw_lookup_function to check a function first. Plug-in objects only redraw with new attributes or ' +
+    'parameters after vs.ResetObject(h), and it does nothing in the job that created them: reset them in a separate, later call.',
     {
       code: z.string().describe('Python source. `import vs` is optional (vs is predefined).'),
       lang: z.enum(['python', 'ops']).optional()
