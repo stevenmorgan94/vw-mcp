@@ -246,6 +246,71 @@ namespace VwMcp
         return result;
     }
 
+    // Unguarded Python for the bridge's own fixed scripts (not AI code). stdout parsed as JSON.
+    static nlohmann::json RunOwnPython(const std::string& code)
+    {
+        using namespace VectorWorks::Scripting;
+        IPythonScriptEnginePtr pyEngine(IID_PythonScriptEngine);
+        if (!pyEngine) return { { "ok", false }, { "error", "Python engine unavailable" } };
+        CDefaultPythonLogger logger;
+        TXString pyText(code.c_str());
+        VCOMError err = pyEngine->ScriptContext_Begin(pyText, &logger);
+        if (err == kVCOMError_NoError)
+            err = pyEngine->ScriptContext_RunEx(&logger);
+        if (err != kVCOMError_NoError || !logger.fErrors.IsEmpty())
+            return { { "ok", false }, { "error", std::string(logger.fErrors.operator const char*()) }, { "vcomError", (int)err } };
+        nlohmann::json r = nlohmann::json::parse(std::string(logger.fOutput.operator const char*()), nullptr, false);
+        return r.is_discarded() ? nlohmann::json { { "ok", false }, { "error", "unexpected output" } } : r;
+    }
+
+    const char* kScriptPaletteName = "vw-mcp Scripts";
+
+    nlohmann::json SaveScriptResource(const std::string& name, const std::string& code)
+    {
+        if (!gSDK->IsDocumentOpen())
+            return { { "ok", false }, { "error", "No document is open." } };
+        std::string py =
+            "import vs, json\n"
+            "_n = " + PyStr(name) + "\n"
+            "_c = " + PyStr(code) + "\n"
+            "if vs.GetObject(_n):\n"
+            "    print(json.dumps({'ok': False, 'exists': True, 'error': 'This drawing already has a resource named ' + _n + '. Pick another name.'}))\n"
+            "else:\n"
+            "    ok = vs.CreateScriptResource(_n, " + PyStr(kScriptPaletteName) + ", False, _c, True)\n"
+            "    print(json.dumps({'ok': bool(ok), 'error': None if ok else 'Vectorworks did not create the script.'}))\n";
+        ScriptDialogGuard guard;
+        UndoEventScope undoScope("Save vw-mcp Script");
+        nlohmann::json r = RunOwnPython(py);
+        if (r.value("ok", false)) r["palette"] = kScriptPaletteName;
+        return r;
+    }
+
+    nlohmann::json SaveActiveDocumentFirst(std::set<std::string>& done)
+    {
+        VectorWorks::Filing::IFileIdentifierPtr id(VectorWorks::Filing::IID_FileIdentifier);
+        bool saved = false;
+        if (!gSDK->GetActiveDocument(&id, saved) || !id) return nullptr;
+        TXString p;
+        id->GetFileFullPath(p);
+        std::string path(p.operator const char*());
+        std::error_code ec;
+        if (path.empty() || !std::filesystem::exists(path, ec)) return nullptr;     // untitled: skipped
+        if (done.count(path)) return nullptr;
+        done.insert(path);    // once per drawing per session, even if the save fails
+        std::string file = std::filesystem::path(path).filename().string();
+        std::string ext = std::filesystem::path(path).extension().string();
+        for (auto& c : ext) c = (char)std::tolower((unsigned char)c);
+        if (ext != ".vwx")
+            return { { "file", file }, { "skipped", "Not a plain .vwx drawing (project files are skipped)." } };
+        GSError e;
+        {
+            ScriptDialogGuard guard;
+            e = gSDK->SaveActiveDocumentPath(id);
+        }
+        if (e != 0) return { { "file", file }, { "error", "Save failed (error " + std::to_string((int)e) + ")." } };
+        return { { "file", file }, { "saved", true } };
+    }
+
     nlohmann::json RunJob(const JobRequest& job)
     {
         // Any vs.* call with only the Home Screen up crashed VW (0x1c7): refuse first.

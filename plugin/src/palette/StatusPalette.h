@@ -12,7 +12,8 @@ namespace VwMcp
     using namespace VectorWorks::Extension;
     using namespace VWFC::PluginSupport;
 
-    // JS bridge object `vwmcp`: status() and copy(text).
+    // JS bridge object `vwmcp`: status(), copy(text), and for the Utility tab (#27) code(jobId),
+    // setPaused(on), setSaveFirst(on), saveScript(jobId, name) -> {ticket}, saveResult(ticket).
     class CStatusJSProvider : public VWExtensionPaletteJSProvider
     {
     public:
@@ -25,6 +26,11 @@ namespace VwMcp
     private:
         void OnStatus(const TXString& objName, const TXString& functionName, const std::vector<nlohmann::json>& args, VectorWorks::UI::IJSFunctionCallbackContext* context);
         void OnCopy(const TXString& objName, const TXString& functionName, const std::vector<nlohmann::json>& args, VectorWorks::UI::IJSFunctionCallbackContext* context);
+        void OnCode(const TXString& objName, const TXString& functionName, const std::vector<nlohmann::json>& args, VectorWorks::UI::IJSFunctionCallbackContext* context);
+        void OnSetPaused(const TXString& objName, const TXString& functionName, const std::vector<nlohmann::json>& args, VectorWorks::UI::IJSFunctionCallbackContext* context);
+        void OnSetSaveFirst(const TXString& objName, const TXString& functionName, const std::vector<nlohmann::json>& args, VectorWorks::UI::IJSFunctionCallbackContext* context);
+        void OnSaveScript(const TXString& objName, const TXString& functionName, const std::vector<nlohmann::json>& args, VectorWorks::UI::IJSFunctionCallbackContext* context);
+        void OnSaveResult(const TXString& objName, const TXString& functionName, const std::vector<nlohmann::json>& args, VectorWorks::UI::IJSFunctionCallbackContext* context);
     };
 
     class CExtStatusPalette : public VWExtensionWebPalette

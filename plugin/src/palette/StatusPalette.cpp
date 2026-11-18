@@ -24,6 +24,11 @@ namespace VwMcp
     BEGIN_WebPalette_DISPATCH_MAP(CStatusJSProvider)
     ADD_WebPalette_FUNCTION("status", OnStatus)
     ADD_WebPalette_FUNCTION("copy", OnCopy)
+    ADD_WebPalette_FUNCTION("code", OnCode)
+    ADD_WebPalette_FUNCTION("setPaused", OnSetPaused)
+    ADD_WebPalette_FUNCTION("setSaveFirst", OnSetSaveFirst)
+    ADD_WebPalette_FUNCTION("saveScript", OnSaveScript)
+    ADD_WebPalette_FUNCTION("saveResult", OnSaveResult)
     END_WebPalette_DISPATCH_MAP
 
     CStatusJSProvider::CStatusJSProvider(IVWUnknown* parent) : VWExtensionPaletteJSProvider(parent) {}
@@ -34,6 +39,8 @@ namespace VwMcp
         fWebFrame = context->GetWebFrame();
         context->AddFunctionPromiseSync("vwmcp.status");
         context->AddFunctionPromiseSync("vwmcp.copy");
+        for (const char* f : { "vwmcp.code", "vwmcp.setPaused", "vwmcp.setSaveFirst", "vwmcp.saveScript", "vwmcp.saveResult" })
+            context->AddFunctionPromiseSync(f);
     }
 
     void CStatusJSProvider::OnStatus(const TXString&, const TXString&, const std::vector<nlohmann::json>&, VectorWorks::UI::IJSFunctionCallbackContext* context)
@@ -70,6 +77,37 @@ namespace VwMcp
 #endif
         // TODO(#9): Windows clipboard.
         context->Resolve(nlohmann::json { { "ok", ok } });
+    }
+
+    static int  ArgInt(const std::vector<nlohmann::json>& a, size_t i)  { return i < a.size() && a[i].is_number() ? a[i].get<int>() : 0; }
+    static bool ArgBool(const std::vector<nlohmann::json>& a, size_t i) { return i < a.size() && a[i].is_boolean() && a[i].get<bool>(); }
+
+    void CStatusJSProvider::OnCode(const TXString&, const TXString&, const std::vector<nlohmann::json>& args, VectorWorks::UI::IJSFunctionCallbackContext* context)
+    {
+        context->Resolve(Bridge::JobCode(ArgInt(args, 0)));
+    }
+
+    void CStatusJSProvider::OnSetPaused(const TXString&, const TXString&, const std::vector<nlohmann::json>& args, VectorWorks::UI::IJSFunctionCallbackContext* context)
+    {
+        Bridge::SetPaused(ArgBool(args, 0));
+        context->Resolve(nlohmann::json { { "ok", true } });
+    }
+
+    void CStatusJSProvider::OnSetSaveFirst(const TXString&, const TXString&, const std::vector<nlohmann::json>& args, VectorWorks::UI::IJSFunctionCallbackContext* context)
+    {
+        Bridge::SetSaveFirst(ArgBool(args, 0));
+        context->Resolve(nlohmann::json { { "ok", true } });
+    }
+
+    void CStatusJSProvider::OnSaveScript(const TXString&, const TXString&, const std::vector<nlohmann::json>& args, VectorWorks::UI::IJSFunctionCallbackContext* context)
+    {
+        std::string name = args.size() > 1 && args[1].is_string() ? args[1].get<std::string>() : "";
+        context->Resolve(Bridge::QueueSaveScript(ArgInt(args, 0), name));
+    }
+
+    void CStatusJSProvider::OnSaveResult(const TXString&, const TXString&, const std::vector<nlohmann::json>& args, VectorWorks::UI::IJSFunctionCallbackContext* context)
+    {
+        context->Resolve(Bridge::TakeInternalResult(ArgInt(args, 0)));
     }
 
     // ---- palette ----------------------------------------------------------------------
