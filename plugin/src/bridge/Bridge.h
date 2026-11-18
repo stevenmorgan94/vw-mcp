@@ -28,5 +28,8 @@ namespace VwMcp
         void           SetSaveFirst(bool on);                                // save each drawing before its first job
         nlohmann::json QueueSaveScript(int jobId, const std::string& name);  // { ok, ticket } | { ok:false, error }
         nlohmann::json TakeInternalResult(int ticket);                       // { pending:true } | the result
+
+        // Research (#29): called by the hidden menu command's DoInterface; runs the pending job.
+        void           RunPendingInMenu();
     }
 }

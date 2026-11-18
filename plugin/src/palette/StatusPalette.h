@@ -62,6 +62,24 @@ namespace VwMcp
         virtual         ~CExtMenuShowStatus();
     };
 
+    // Research (#29): a menu command that runs the bridge's pending job, so the job runs in the
+    // context Vectorworks gives a menu command. Invoked with gSDK->DoMenuName from the pump; not in any menu.
+    class CExtMenuRunJob_EventSink : public VWMenu_EventSink
+    {
+    public:
+                        CExtMenuRunJob_EventSink(IVWUnknown* parent);
+        virtual         ~CExtMenuRunJob_EventSink();
+        virtual void    DoInterface();
+    };
+
+    class CExtMenuRunJob : public VWExtensionMenu
+    {
+        DEFINE_VWMenuExtension;
+    public:
+                        CExtMenuRunJob(CallBackPtr cbp);
+        virtual         ~CExtMenuRunJob();
+    };
+
     // Puts "vw-mcp Status…" in the Help menu. Main thread; safe to call repeatedly (acts once).
     // Called on every plugin_module_main entry until IWorkspaces is available (the menus are built
     // early), as the context probe did; adding it later only takes effect after a workspace reload.

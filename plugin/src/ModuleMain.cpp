@@ -35,6 +35,7 @@ extern "C" Sint32 GS_EXTERNAL_ENTRY plugin_module_main(Sint32 action, void* modu
     // The status palette and the menu command that shows it (also put in the Help menu at launch).
     REGISTER_Extension<VwMcp::CExtStatusPalette>(GROUPID_ExtensionWebPalettes, action, moduleInfo, iid, inOutInterface, cbp, reply);
     REGISTER_Extension<VwMcp::CExtMenuShowStatus>(GROUPID_ExtensionMenu, action, moduleInfo, iid, inOutInterface, cbp, reply);
+    REGISTER_Extension<VwMcp::CExtMenuRunJob>(GROUPID_ExtensionMenu, action, moduleInfo, iid, inOutInterface, cbp, reply);   // research #29
 
     return reply;
 }

@@ -193,6 +193,41 @@ namespace Bridge
         gBusy = IsModalWindowUp();
     }
 
+    // ---- research (#29): menu-command context -------------------------------------------
+    static const JobRequest* gMenuReq = nullptr;
+    static nlohmann::json    gMenuResult;
+    static bool              gMenuRan = false;
+
+    static nlohmann::json ContextProbe()
+    {
+        return { { "buildingUndoEvent", (bool)gSDK->IsCurrentlyBuildingAnUndoEvent() },
+                 { "modalWindow", IsModalWindowUp() } };
+    }
+
+    void RunPendingInMenu()
+    {
+        if (!gMenuReq) { Log("bridge: run-job menu called with no pending job"); return; }
+        gMenuRan = true;
+        nlohmann::json probe = ContextProbe();
+        try { gMenuResult = RunJob(*gMenuReq); }
+        catch (...) { gMenuResult = { { "ok", false }, { "error", "exception in menu context" } }; }
+        gMenuResult["menuContext"] = probe;
+    }
+
+    static nlohmann::json RunViaMenu(const JobRequest& req)
+    {
+        gMenuReq = &req;
+        gMenuRan = false;
+        gMenuResult = nullptr;
+        std::string name = req.opts.value("menuName", std::string("ExtMenuVwMcpRunJob"));
+        short r = gSDK->DoMenuName(TXString(name.c_str()), 0);
+        gMenuReq = nullptr;
+        nlohmann::json result = gMenuRan ? gMenuResult
+                                         : nlohmann::json { { "ok", false }, { "error", "the menu command did not run synchronously" } };
+        result["doMenuName"] = { { "name", name }, { "returned", r }, { "ran", gMenuRan } };
+        return result;
+    }
+
     // Runs at most one queued job per pass, so VW stays responsive between jobs.
     static void PumpTimerCB(CFRunLoopTimerRef, void*)
     {
@@ -233,7 +268,14 @@ namespace Bridge
             {
                 if (gSaveFirst && gDocOpen)
                     savedFirst = SaveActiveDocumentFirst(gSavedDocs);
-                result = RunJob(req);
+                if (req.opts.value("context", std::string()) == "menu")
+                    result = RunViaMenu(req);
+                else
+                {
+                    nlohmann::json probe = ContextProbe();
+                    result = RunJob(req);
+                    if (req.opts.value("probe", false)) result["timerContext"] = probe;
+                }
                 if (!savedFirst.is_null()) result["savedFirst"] = savedFirst;
             }
         }
@@ -345,6 +387,9 @@ namespace Bridge
             return SendJson(res, Refusal("language", "Only Python is supported: the safety layer can't see inside VectorScript."));
         for (const char* k : { "allowDocumentLevel", "allowUnclassified" })
             j.req.opts[k] = a.contains(k) && a[k].is_boolean() && a[k].get<bool>();
+        // Research (#29) options, passed through as-is.
+        for (const char* k : { "context", "menuName", "scopes", "probe" })
+            if (a.contains(k)) j.req.opts[k] = a[k];
         j.req.opts["autoReset"] = !(a.contains("autoReset") && a["autoReset"].is_boolean() && !a["autoReset"].get<bool>());
         double timeoutSec = 30.0;
         if (a.contains("timeoutSec") && a["timeoutSec"].is_number())

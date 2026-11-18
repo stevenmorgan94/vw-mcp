@@ -1,0 +1,26 @@
+{"t":"2026-11-18T04:38:12.196Z","key":"AddVectorFillLayer|menu","fn":"AddVectorFillLayer","ctx":"menu","outcome":"crash","ms":1678,"modal":null}
+{"t":"2026-11-18T04:41:50.260Z","key":"DisplayContextHelpOfCurrentPlugin|menu","fn":"DisplayContextHelpOfCurrentPlugin","ctx":"menu","outcome":"crash","ms":1755,"modal":null}
+{"t":"2026-11-18T04:45:24.074Z","key":"DisplayLayerScaleDialog|menu","fn":"DisplayLayerScaleDialog","ctx":"menu","outcome":"ok","ms":10562,"modal":"Layer Scale;clicked Cancel;","stdout":"RESULT None\n","stderr":"","guarded":false,"doMenuName":{"name":"ExtMenuVwMcpRunJob","ran":true,"returned":0},"menuContext":{"buildingUndoEvent":false,"modalWindow":false}}
+{"t":"2026-11-18T04:45:34.703Z","key":"DisplayOrganizationDialog|menu","fn":"DisplayOrganizationDialog","ctx":"menu","outcome":"ok","ms":10545,"modal":"Organization;clicked Cancel;","stdout":"RESULT None\n","stderr":"","guarded":false,"doMenuName":{"name":"ExtMenuVwMcpRunJob","ran":true,"returned":0},"menuContext":{"buildingUndoEvent":false,"modalWindow":false}}
+{"t":"2026-11-18T04:45:36.437Z","key":"Plant_ReplacePlantParam|menu","fn":"Plant_ReplacePlantParam","ctx":"menu","outcome":"crash","ms":1634,"modal":null}
+{"t":"2026-11-18T15:13:41.498Z","key":"SetConstraintValue|menu","fn":"SetConstraintValue","ctx":"menu","outcome":"crash","ms":1687,"modal":null}
+{"t":"2026-11-18T15:17:12.144Z","key":"SetTexSpaceEndCap|menu","fn":"SetTexSpaceEndCap","ctx":"menu","outcome":"ok","ms":50,"modal":null,"stdout":"RESULT None\n","stderr":"","guarded":false,"doMenuName":{"name":"ExtMenuVwMcpRunJob","ran":true,"returned":0},"menuContext":{"buildingUndoEvent":false,"modalWindow":false}}
+{"t":"2026-11-18T15:18:03.290Z","key":"RefreshResManager|menu","fn":"RefreshResManager","ctx":"menu","outcome":"hang","ms":48010,"modal":"-"}
+{"t":"2026-11-18T15:21:16.332Z","key":"RetrieveOpenGLPrefs|menu","fn":"RetrieveOpenGLPrefs","ctx":"menu","outcome":"ok","ms":67,"modal":null,"stdout":"RESULT (False, 66, True)\n","stderr":"","guarded":false,"doMenuName":{"name":"ExtMenuVwMcpRunJob","ran":true,"returned":0},"menuContext":{"buildingUndoEvent":false,"modalWindow":false}}
+{"t":"2026-11-18T15:21:18.082Z","key":"CC_GetCircuitDest|menu","fn":"CC_GetCircuitDest","ctx":"menu","outcome":"crash","ms":1678,"modal":null}
+{"t":"2026-11-18T15:24:01.636Z","key":"CC_GetCircuitSource|menu","fn":"CC_GetCircuitSource","ctx":"menu","outcome":"crash","ms":1644,"modal":null}
+{"t":"2026-11-18T15:26:43.144Z","key":"TBB_AttachRecords|menu","fn":"TBB_AttachRecords","ctx":"menu","outcome":"crash","ms":1668,"modal":null}
+{"t":"2026-11-18T15:28:36.171Z","key":"UprString|menu","fn":"UprString","ctx":"menu","outcome":"crash","ms":1647,"modal":null}
+{"t":"2026-11-18T15:32:04.164Z","key":"AddVectorFillLayer|timer","fn":"AddVectorFillLayer","ctx":"timer","outcome":"crash","ms":1634,"modal":null}
+{"t":"2026-11-18T15:35:34.969Z","key":"DisplayContextHelpOfCurrentPlugin|timer","fn":"DisplayContextHelpOfCurrentPlugin","ctx":"timer","outcome":"crash","ms":1652,"modal":null}
+{"t":"2026-11-18T15:39:12.124Z","key":"DisplayLayerScaleDialog|timer","fn":"DisplayLayerScaleDialog","ctx":"timer","outcome":"ok","ms":10475,"modal":"Layer Scale;clicked Cancel;","stdout":"RESULT None\n","stderr":"","guarded":false}
+{"t":"2026-11-18T15:39:22.683Z","key":"DisplayOrganizationDialog|timer","fn":"DisplayOrganizationDialog","ctx":"timer","outcome":"ok","ms":10497,"modal":"Organization;clicked Cancel;","stdout":"RESULT None\n","stderr":"","guarded":false}
+{"t":"2026-11-18T15:39:24.411Z","key":"Plant_ReplacePlantParam|timer","fn":"Plant_ReplacePlantParam","ctx":"timer","outcome":"crash","ms":1672,"modal":null}
+{"t":"2026-11-18T15:43:00.133Z","key":"SetConstraintValue|timer","fn":"SetConstraintValue","ctx":"timer","outcome":"crash","ms":1659,"modal":null}
+{"t":"2026-11-18T15:46:20.188Z","key":"SetTexSpaceEndCap|timer","fn":"SetTexSpaceEndCap","ctx":"timer","outcome":"ok","ms":83,"modal":null,"stdout":"RESULT None\n","stderr":"","guarded":false}
+{"t":"2026-11-18T15:47:11.419Z","key":"RefreshResManager|timer","fn":"RefreshResManager","ctx":"timer","outcome":"hang","ms":48068,"modal":"-"}
+{"t":"2026-11-18T15:50:42.347Z","key":"RetrieveOpenGLPrefs|timer","fn":"RetrieveOpenGLPrefs","ctx":"timer","outcome":"ok","ms":27,"modal":null,"stdout":"RESULT (False, 66, True)\n","stderr":"","guarded":false}
+{"t":"2026-11-18T15:50:44.056Z","key":"CC_GetCircuitDest|timer","fn":"CC_GetCircuitDest","ctx":"timer","outcome":"crash","ms":1638,"modal":null}
+{"t":"2026-11-18T15:54:16.472Z","key":"CC_GetCircuitSource|timer","fn":"CC_GetCircuitSource","ctx":"timer","outcome":"crash","ms":1624,"modal":null}
+{"t":"2026-11-18T15:57:42.679Z","key":"TBB_AttachRecords|timer","fn":"TBB_AttachRecords","ctx":"timer","outcome":"crash","ms":1658,"modal":null}
+{"t":"2026-11-18T16:01:06.634Z","key":"UprString|timer","fn":"UprString","ctx":"timer","outcome":"crash","ms":1650,"modal":null}

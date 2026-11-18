@@ -10,6 +10,7 @@
 #include <fstream>
 #include <iterator>
 #include <cstring>
+#include <optional>
 
 #if GS_MAC
 #include <CoreFoundation/CoreFoundation.h>
@@ -209,8 +210,12 @@ namespace VwMcp
         VCOMError err;
         nlohmann::json autoReset;     // null: nothing to reset
         {
-            ScriptDialogGuard guard;
-            UndoEventScope undoScope("MCP Script");
+            // Research (#29): "scopes": false runs without the dialog guard and undo event, to see what
+            // a menu command's own context provides.
+            const bool scopes = job.opts.value("scopes", true);
+            std::optional<ScriptDialogGuard> guard;
+            std::optional<UndoEventScope> undoScope;
+            if (scopes) { guard.emplace(); undoScope.emplace("MCP Script"); }
             // ScriptContext_Begin + RunEx, never ExecuteScript: ExecuteScript is the entry point that
             // crashed vs.Rect, vs.CreateWS, vs.BuildResourceList and vs.Layer (spec §1).
             err = pyEngine->ScriptContext_Begin(pyText, &logger);

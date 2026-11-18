@@ -162,6 +162,24 @@ namespace VwMcp
         gSDK->SetWebPaletteVisibility(CExtStatusPalette::_GetIID(), true);
     }
 
+    // ---- research (#29): run the pending job inside a menu command ----------------------
+    static SMenuDef gRunJobMenuDef = {
+        /*Needs*/           EMenuEnableFlags::None,
+        /*NeedsNot*/        EMenuEnableFlags::None,
+        /*Title*/           { "ExtMenuVwMcpRunJob", "menu_title" },
+        /*Category*/        { "ExtMenuVwMcpRunJob", "menu_category" },
+        /*HelpText*/        { "ExtMenuVwMcpRunJob", "menu_helptext" },
+        /*VersionCreated*/  32,
+        /*VersionModified*/ 0,
+        /*VersionRetired*/  0,
+        /*OverrideHelpID*/  " "
+    };
+    CExtMenuRunJob::CExtMenuRunJob(CallBackPtr cbp) : VWExtensionMenu(cbp, gRunJobMenuDef) {}
+    CExtMenuRunJob::~CExtMenuRunJob() {}
+    CExtMenuRunJob_EventSink::CExtMenuRunJob_EventSink(IVWUnknown* parent) : VWMenu_EventSink(parent) {}
+    CExtMenuRunJob_EventSink::~CExtMenuRunJob_EventSink() {}
+    void CExtMenuRunJob_EventSink::DoInterface() { Bridge::RunPendingInMenu(); }
+
     static int gHelpMenuErr = -1;     // -1 = not attempted / IWorkspaces not available yet
     static int gHelpMenuTries = 0;
     int HelpMenuItemResult() { return gHelpMenuErr; }
@@ -196,3 +214,11 @@ IMPLEMENT_VWMenuExtension(
     /*Universal name*/  "ExtMenuShowVwMcpStatus",
     /*Version*/         1,
     /*UUID*/            0x5749bfdf, 0x30ec, 0x460a, 0x8a, 0x62, 0x8a, 0x27, 0x6c, 0x7d, 0x92, 0x52);
+
+// {8E3B5C21-4F7A-4B0D-9C55-2D7E61A9F0B4}
+IMPLEMENT_VWMenuExtension(
+    /*Extension class*/ VwMcp::CExtMenuRunJob,
+    /*Event sink*/      VwMcp::CExtMenuRunJob_EventSink,
+    /*Universal name*/  "ExtMenuVwMcpRunJob",
+    /*Version*/         1,
+    /*UUID*/            0x8e3b5c21, 0x4f7a, 0x4b0d, 0x9c, 0x55, 0x2d, 0x7e, 0x61, 0xa9, 0xf0, 0xb4);
