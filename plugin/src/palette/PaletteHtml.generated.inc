@@ -11,6 +11,8 @@ static const char* kPaletteHtml = R"VWMCPHTML(<!doctype html>
   run time. Talks to C++ through the web-palette bridge object `vwmcp`:
     vwmcp.status()      -> the same JSON as GET /status
     vwmcp.copy(text)    -> puts text on the system clipboard
+    Utility tab (#27): vwmcp.code(jobId), setPaused(on), setSaveFirst(on),
+    saveScript(jobId, name) -> {ticket}, saveResult(ticket) -> {pending} | {ok, error}
   Opened outside Vectorworks it shows sample data so the layout can be checked in a browser.
 -->
 <style>
@@ -48,13 +50,29 @@ pre { margin: 0; background: var(--code); border: 1px solid var(--line); border-
 .copyrow { display: flex; flex-direction: column; gap: 4px }
 .copybtn { align-self: flex-end; font: inherit; font-size: 11.5px; padding: 3px 10px; border-radius: 4px; border: 1px solid var(--accent); color: var(--accent); background: transparent; cursor: pointer }
 select { font: inherit; padding: 4px 6px; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); width: 100% }
-button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
 .log { list-style: none; margin: 0; padding: 0 }
 .log li { display: grid; grid-template-columns: 58px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 11.5px }
 .log time { font-family: var(--mono); color: var(--muted) }
 .log code { font-family: var(--mono) }
 .pill { display: inline-block; font-size: 10.5px; padding: 0 6px; border-radius: 999px; border: 1px solid currentColor; margin-left: 4px }
 .empty { color: var(--muted); padding: 12px 0 }
+.btn { font: inherit; font-size: 11.5px; padding: 3px 10px; border-radius: 4px; border: 1px solid var(--line); color: var(--fg); background: var(--panel); cursor: pointer }
+.btn.primary { border-color: var(--accent); background: var(--accent); color: #fff }
+.btn:disabled { opacity: .5; cursor: default }
+.row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap }
+.switch { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; font-weight: 500 }
+.switch input { margin: 2px 0 0 }
+.switch + .note { margin: -6px 0 0 22px }
+input[type=text] { font: inherit; padding: 3px 6px; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); flex: 1; min-width: 120px }
+section { display: flex; flex-direction: column; gap: 8px }
+.log li.job { cursor: pointer }
+.log li.job:hover { background: color-mix(in srgb, var(--accent) 6%, transparent) }
+.log li.job.open { cursor: default; background: none }
+.scripts li { grid-template-columns: 58px 1fr auto; align-items: start }
+.detail { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px }
+.msg { font-size: 11.5px } .msg.ok { color: var(--ok) } .msg.bad { color: var(--bad) }
+.more { color: var(--accent); font-size: 11px; margin-left: 4px; white-space: nowrap }
 .beta { font-size: 11px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 8px; margin-top: 2px }
 </style>
 </head>
@@ -64,6 +82,7 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
   <button role="tab" data-tab="status" aria-selected="true">Status</button>
   <button role="tab" data-tab="connect" aria-selected="false">Connect AI</button>
   <button role="tab" data-tab="activity" aria-selected="false">Activity</button>
+  <button role="tab" data-tab="utility" aria-selected="false">Utility</button>
 </nav>
 <main id="main"></main>
 <script>
@@ -90,13 +109,27 @@ const PROMPT = `You can control Vectorworks through the vw-mcp tools.
 - Each job is one undo step in Vectorworks.`;
 
 const inVW = typeof vwmcp !== 'undefined';
-const SAMPLE = { ok: true, vwBuild: '32.0.0 (882075)', engine: 'ctx', guardVersion: 6, sweepMode: false, documentOpen: true, busy: null,
+const SAMPLE = { ok: true, paused: false, saveFirst: false, scriptPalette: 'vw-mcp Scripts',
+  scripts: [{ jobId: 1, at: new Date().toISOString(), client: 'claude-code', title: 'Insert 6 stage decks', preview: 'for i in range(6):', lines: 9 }], vwBuild: '32.0.0 (882075)', engine: 'ctx', guardVersion: 6, sweepMode: false, documentOpen: true, busy: null,
   port: 47823, pid: 1234, pluginVersion: '0.1.0', tableBuild: '32.0.0 (882075)', tableFunctions: 2827,
   clients: [{ name: 'claude-code', lastSeen: new Date().toISOString() }],
   activity: [{ at: new Date().toISOString(), jobId: 2, client: 'claude-code', lang: 'python', ms: 120, ok: false, refused: true, function: 'AddVectorFillLayer', class: 'crasher', error: 'vs.AddVectorFillLayer crashes Vectorworks.' },
-             { at: new Date().toISOString(), jobId: 1, client: 'claude-code', lang: 'python', ms: 80, ok: true, calls: 12 }] };
+             { at: new Date().toISOString(), jobId: 1, client: 'claude-code', lang: 'python', ms: 80, ok: true, calls: 12, hasCode: true }] };
+const SAMPLE_CODE = '# Insert 6 stage decks\nimport vs\nfor i in range(6):\n    h = vs.CreateCustomObjectN("Stage Deck", (i * 1300, 0), 0, False)\n';
+// Outside Vectorworks: stand-ins so the page can be checked in a browser.
+const FAKE = { code: async (id) => ({ ok: true, jobId: id, lang: 'python', jobOk: true, code: SAMPLE_CODE }),
+  setPaused: async (on) => { SAMPLE.paused = on; return { ok: true }; }, setSaveFirst: async (on) => { SAMPLE.saveFirst = on; return { ok: true }; },
+  saveScript: async () => ({ ok: true, ticket: 99 }), saveResult: async () => ({ ok: true, palette: 'vw-mcp Scripts' }) };
+async function call(fn, ...args) {
+  const r = inVW ? await vwmcp[fn](...args) : await FAKE[fn](...args);
+  return typeof r === 'string' ? JSON.parse(r) : r;
+}
 
 let tab = 'status', client = 'code', st = null, err = null;
+const codes = {};            // jobId -> vwmcp.code() result
+let openJob = null;          // Activity: the job whose code is shown
+let saveFor = null, saveName = '', saveBusy = false, saveMsg = null;   // the save form (one at a time)
+let diagMsg = '';
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const ago = (iso) => { const s = Math.round((Date.now() - Date.parse(iso)) / 1000); return isNaN(s) ? '' : s < 60 ? s + ' s ago' : s < 3600 ? Math.round(s / 60) + ' min ago' : Math.round(s / 3600) + ' h ago'; };
 const hhmm = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : d.toTimeString().slice(0, 8); };
@@ -104,6 +137,7 @@ const hhmm = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : d.toTime
 function summary(s) {
   if (!s) return { level: 'bad', head: 'No status', sub: err || 'The plug-in did not answer.' };
   if (!s.port) return { level: 'bad', head: 'Bridge not running', sub: 'Ports 47823–47830 are all in use. Quit the app using them, then restart Vectorworks.' };
+  if (s.paused) return { level: 'warn', head: 'Paused: AI jobs are off', sub: 'Every new job is refused. Turn AI jobs back on in the Utility tab.' };
   if (s.busy) return { level: 'warn', head: 'Paused: a dialog is open', sub: 'Jobs wait 10 s, then are refused. Close the dialog to continue.' };
   if (!s.documentOpen) return { level: 'warn', head: 'Open a drawing', sub: 'Scripts are refused until a drawing is open.' };
   if (s.tableBuild && s.vwBuild && s.tableBuild !== s.vwBuild) return { level: 'warn', head: 'Connected, new Vectorworks build', sub: `The safety table was tested on ${s.tableBuild}. It still applies, but re-test when you can.` };
@@ -113,6 +147,75 @@ function summary(s) {
 }
 
 function copyBlock(id, text) { return `<div class="copyrow"><pre id="${id}">${esc(text)}</pre><button class="copybtn" data-copy="${id}">Copy</button></div>`; }
+
+function saveForm(id) {
+  let h = '';
+  if (saveFor === id) h += `<div class="row"><input type="text" id="sname" maxlength="63" value="${esc(saveName)}" aria-label="Script name"${saveBusy ? ' disabled' : ''}>
+    <button class="btn primary" data-save-go="${id}"${saveBusy ? ' disabled' : ''}>Save</button><button class="btn" data-save-cancel${saveBusy ? ' disabled' : ''}>Cancel</button></div>`;
+  if (saveMsg?.jobId === id) h += `<span class="msg ${saveMsg.bad ? 'bad' : saveMsg.busy ? '' : 'ok'}">${esc(saveMsg.text)}</span>`;
+  return h;
+}
+
+function codeView(id) {
+  const c = codes[id];
+  if (!c) return `<div class="detail"><span class="note">Loading…</span></div>`;
+  if (!c.ok) return `<div class="detail"><span class="note">${esc(c.error)}</span></div>`;
+  const canSave = c.lang === 'python' && c.jobOk;
+  return `<div class="detail">${copyBlock('code-' + id, c.code)}
+    ${canSave ? (saveFor === id ? '' : `<div class="row"><button class="btn" data-save="${id}">Save as script…</button></div>`) + saveForm(id) : ''}
+    <div class="row"><button class="btn" data-close>Close</button></div></div>`;
+}
+
+function defaultName(id) {
+  const s = (st?.scripts || []).find((x) => x.jobId === id);
+  return (s?.title || 'AI script ' + id).slice(0, 63);
+}
+
+function diagnostics() {
+  const s = st || {};
+  const L = [`vw-mcp diagnostics ${new Date().toISOString()}`,
+    `Plug-in ${s.pluginVersion} · guard ${s.guardVersion} · engine ${s.engine}`,
+    `Vectorworks ${s.vwBuild} · safety table ${s.tableBuild} (${s.tableFunctions} functions)`,
+    `Bridge ${s.port ? '127.0.0.1:' + s.port : 'not listening'} · document ${s.documentOpen ? 'open' : 'none'} · busy ${s.busy ? 'yes' : 'no'} · queued ${s.queued ?? 0}`,
+    `Paused ${s.paused ? 'yes' : 'no'} · save first ${s.saveFirst ? 'yes' : 'no'} · sweep mode ${s.sweepMode ? 'yes' : 'no'} · help menu ${s.helpMenuItem}`,
+    `AI apps: ${(s.clients || []).map((c) => c.name + ' (' + c.lastSeen + ')').join(', ') || 'none'}`,
+    `Browser: ${navigator.userAgent}`, '', 'Recent jobs (newest first):'];
+  for (const a of (s.activity || []).slice(0, 15))
+    L.push(`  ${a.at} #${a.jobId} ${a.lang} ${a.ok ? 'ok' : 'FAILED'} ${a.ms} ms${a.calls != null ? ' calls=' + a.calls : ''}${a.autoReset ? ' autoReset=' + a.autoReset : ''}` +
+      `${a.refused ? ' refused ' + (a.function || '') + ' [' + a.class + ']' : ''}${a.timeout ? ' timeout' : ''}${a.error ? ' error: ' + a.error : ''}${a.client ? ' (' + a.client + ')' : ''}`);
+  return L.join('\n');
+}
+
+async function showCode(id) {
+  openJob = openJob === id ? null : id;
+  render();
+  if (openJob != null && !codes[id]) {
+    try { codes[id] = await call('code', id); } catch (e) { codes[id] = { ok: false, error: String(e?.message || e) }; }
+    render();
+  }
+}
+
+async function doSave(id) {
+  const name = (document.getElementById('sname')?.value || '').trim();
+  saveName = name; saveBusy = true; saveMsg = { jobId: id, busy: true, text: 'Saving…' }; render();
+  let r;
+  try {
+    r = await call('saveScript', id, name);
+    if (r.ok) {
+      const ticket = r.ticket, until = Date.now() + 30000;
+      for (;;) {
+        await new Promise((res) => setTimeout(res, 300));
+        r = await call('saveResult', ticket);
+        if (!r.pending) break;
+        if (Date.now() > until) { r = { ok: false, error: 'Vectorworks didn’t get to it within 30 s (a dialog may be open). It may still save.' }; break; }
+      }
+    }
+  } catch (e) { r = { ok: false, error: String(e?.message || e) }; }
+  saveBusy = false;
+  if (r.ok) { saveFor = null; saveMsg = { jobId: id, text: `Saved “${name}” to the ${r.palette || 'vw-mcp Scripts'} palette in the Resource Manager.` }; }
+  else saveMsg = { jobId: id, bad: true, text: r.error || 'Not saved.' };
+  render();
+}
 
 function render() {
   const sm = summary(st);
@@ -141,16 +244,37 @@ function render() {
       <p class="note"><strong>Use a chat or session running on this Mac.</strong> Cloud and web sessions (claude.ai in a browser, remote Code sessions) can’t reach Vectorworks.</p>
       <span class="label">Tell your AI</span>
       <p class="note">Paste this into your AI’s instructions or the start of a chat.</p>${copyBlock('prompt', PROMPT)}`;
-  } else {
+  } else if (tab === 'activity') {
     const a = st?.activity || [];
     h += a.length ? `<ul class="log">${a.map((x) => {
       let what;
-      if (x.refused) what = `<span class="t-bad">refused <code>${esc(x.function ? 'vs.' + x.function : x.class)}</code><span class="pill">${esc(x.class)}</span></span>`;
+      if (x.refused) what = `<span class="t-bad">refused${x.function ? ` <code>vs.${esc(x.function)}</code>` : ''}<span class="pill">${esc(x.class)}</span></span>`;
       else if (x.timeout) what = `<span class="t-warn">stopped at the time limit</span>`;
       else if (!x.ok) what = `<span class="t-warn">${esc(x.lang === 'ops' ? 'native ops' : 'script')} error: ${esc((x.error || '').slice(0, 120))}</span>`;
-      else what = `${x.lang === 'ops' ? 'native ops' : 'script'} ran${x.calls != null ? ' · ' + x.calls + ' vs calls' : ''} · ${x.ms} ms`;
-      return `<li><time>${hhmm(x.at)}</time><span>${what}${x.client ? ` <span class="note">(${esc(x.client)})</span>` : ''}</span></li>`;
-    }).join('')}</ul><p class="note">Last ${a.length} of up to 50 jobs since Vectorworks started.</p>` : `<p class="empty">No jobs yet. They appear here as your AI runs them.</p>`;
+      else what = `${x.lang === 'ops' ? 'native ops' : 'script'} ran${x.calls != null ? ' · ' + x.calls + (x.calls === 1 ? ' vs call' : ' vs calls') : ''}${x.autoReset ? ' · ' + x.autoReset + ' reset' : ''} · ${x.ms} ms`;
+      if (x.savedFirst?.saved) what += ` <span class="pill">saved ${esc(x.savedFirst.file)} first</span>`;
+      else if (x.savedFirst?.error) what += ` <span class="t-bad">· save first failed: ${esc(x.savedFirst.error)}</span>`;
+      const open = openJob === x.jobId;
+      const more = x.hasCode && !open ? '<span class="more">code ▸</span>' : '';
+      return `<li class="${x.hasCode ? 'job' : ''}${open ? ' open' : ''}"${x.hasCode ? ` data-job="${x.jobId}"` : ''}><time>${hhmm(x.at)}</time><span>${what}${x.client ? ` <span class="note">(${esc(x.client)})</span>` : ''}${more}</span>${open ? codeView(x.jobId) : ''}</li>`;
+    }).join('')}</ul><p class="note">Last ${a.length} of up to 50 jobs since Vectorworks started. Click a job to see its code (the last 20 are kept until Vectorworks quits).</p>` : `<p class="empty">No jobs yet. They appear here as your AI runs them.</p>`;
+  } else {
+    const sc = st?.scripts || [];
+    h += `<section><span class="label">AI jobs</span>
+      <label class="switch"><input type="checkbox" id="paused"${st?.paused ? ' checked' : ''}> Pause AI</label>
+      <p class="note">While paused, every new job is refused and your AI is told to wait for you. Stays on until you turn it off.</p>
+      <label class="switch"><input type="checkbox" id="saveFirst"${st?.saveFirst ? ' checked' : ''}> Save the drawing before AI changes it</label>
+      <p class="note">Saves each drawing once, before the first AI job on it since Vectorworks started. Untitled drawings and project files are skipped.</p></section>
+      <section><span class="label">Save as script</span>
+      <p class="note">Keep a script your AI ran: it goes into the “${esc(st?.scriptPalette || 'vw-mcp Scripts')}” script palette in this drawing’s Resource Manager. Double-click it there to run it again. Saved scripts run without vw-mcp’s safety checks; after one that makes plug-in objects, run Tools › Utilities › Reset All Plug-Ins.</p>`;
+    h += sc.length ? `<ul class="log scripts">${sc.map((x) => `<li><time>${hhmm(x.at)}</time>
+        <span>${esc(x.title || x.preview || 'script')}<br><span class="note">${x.title && x.preview ? '<code>' + esc(x.preview) + '</code> · ' : ''}${x.lines} lines${x.client ? ' · ' + esc(x.client) : ''}</span></span>
+        <span>${saveFor === x.jobId ? '' : `<button class="btn" data-save="${x.jobId}">Save…</button>`}</span>
+        ${saveFor === x.jobId || saveMsg?.jobId === x.jobId ? `<div class="detail">${saveForm(x.jobId)}</div>` : ''}</li>`).join('')}</ul>`
+      : `<p class="empty">No successful Python jobs yet.</p>`;
+    h += `</section><section><span class="label">Bug reports</span>
+      <div class="row"><button class="btn" id="diag">Copy diagnostics</button><span class="msg ok">${esc(diagMsg)}</span></div>
+      <p class="note">Copies versions, status and recent errors (no drawing content or code) to paste into a bug report.</p></section>`;
   }
   const m = document.getElementById('main');
   const keepScroll = m.scrollTop;
@@ -163,23 +287,57 @@ async function refresh() {
     const r = inVW ? await vwmcp.status() : SAMPLE;
     st = typeof r === 'string' ? JSON.parse(r) : r; err = null;
   } catch (e) { err = String(e && e.message || e); }
-  // Don't re-render the Connect tab while the user is reading or selecting text in it.
-  if (tab !== 'connect' || !document.getElementById('client')) render();
+  // Don't re-render while the user is reading the Connect tab, typing a name, or selecting text.
+  const m = document.getElementById('main');
+  const sel = getSelection();
+  const busy = (tab === 'connect' && document.getElementById('client')) || saveBusy ||
+    (document.activeElement?.tagName === 'INPUT' && document.activeElement.type === 'text') ||
+    (sel && !sel.isCollapsed && m.contains(sel.anchorNode));
+  if (!busy) render();
   else { const sm = summary(st); document.getElementById('sdot').className = 'dot s-' + sm.level; document.getElementById('shead').textContent = sm.head; }
 }
 
 document.addEventListener('click', async (e) => {
   const t = e.target.closest('[data-tab]');
   if (t) { tab = t.dataset.tab; render(); return; }
+  const sv = e.target.closest('[data-save]');
+  if (sv) { const id = +sv.dataset.save; saveFor = id; saveName = defaultName(id); saveMsg = null; render(); const i = document.getElementById('sname'); i?.focus(); i?.select(); return; }
+  const go = e.target.closest('[data-save-go]');
+  if (go) { doSave(+go.dataset.saveGo); return; }
+  if (e.target.closest('[data-save-cancel]')) { saveFor = null; saveMsg = null; render(); return; }
+  if (e.target.closest('[data-close]')) { openJob = null; saveFor = null; render(); return; }
+  if (e.target.id === 'diag') {
+    const text = diagnostics();
+    try { if (inVW) await vwmcp.copy(text); else await navigator.clipboard.writeText(text); diagMsg = 'Copied'; }
+    catch { diagMsg = 'Copy failed'; }
+    render(); setTimeout(() => { diagMsg = ''; render(); }, 1500); return;
+  }
   const c = e.target.closest('[data-copy]');
   if (c) {
     const text = document.getElementById(c.dataset.copy).textContent;
     try { if (inVW) await vwmcp.copy(text); else await navigator.clipboard.writeText(text); c.textContent = 'Copied'; }
     catch { getSelection().selectAllChildren(document.getElementById(c.dataset.copy)); c.textContent = 'Press ⌘C'; }
     setTimeout(() => (c.textContent = 'Copy'), 1500);
+    return;
+  }
+  const jb = e.target.closest('li.job:not(.open)');
+  if (jb) showCode(+jb.dataset.job);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.target.id !== 'sname') return;
+  if (e.key === 'Enter' && saveFor != null) doSave(saveFor);
+  if (e.key === 'Escape') { saveFor = null; saveMsg = null; render(); }
+});
+document.addEventListener('change', async (e) => {
+  if (e.target.id === 'client') { client = e.target.value; render(); }
+  if (e.target.id === 'paused' || e.target.id === 'saveFirst') {
+    const on = e.target.checked;
+    await call(e.target.id === 'paused' ? 'setPaused' : 'setSaveFirst', on).catch(() => {});
+    if (st) st[e.target.id] = on;
+    refresh();
   }
 });
-document.addEventListener('change', (e) => { if (e.target.id === 'client') { client = e.target.value; render(); } });
+document.addEventListener('input', (e) => { if (e.target.id === 'sname') saveName = e.target.value; });
 render();
 refresh();
 setInterval(refresh, 2000);

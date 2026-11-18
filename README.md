@@ -47,12 +47,25 @@ You can control Vectorworks through the vw-mcp tools.
 
 | Tool | What it does |
 |---|---|
-| `vw_bridge_status` | Connection, Vectorworks build, document open, dialog blocking, safety table, last refusal. |
+| `vw_bridge_status` | Connection, Vectorworks build, document open, dialog blocking, paused, safety table, last refusal. |
 | `execute_script` | Runs Python in the open document. Options: `timeoutSec` (default 30, max 300), `allowUnclassified`, `allowDocumentLevel`. |
 | `run_native_op` | Changes the document through native SDK calls (rect, line, text, layer, viewport, move, … and a generic `call`). |
 | `vw_lookup_function` | A `vs.*` function's safety class, argument checks, signature and alternative. |
 
 A refused call returns an error with `{refused, function, class, reason, alternative, partialChanges, advice}`. If earlier calls in the same job already changed the drawing, **Edit › Undo** reverts the whole job.
+
+## The status palette
+
+**Help › vw-mcp Status…** has four tabs:
+
+- **Status:** the bridge, connected AI apps, the open drawing and versions.
+- **Connect AI:** setup snippets and the house rules, with copy buttons.
+- **Activity:** the last 50 jobs. Click one to see the code it ran (the last 20 are kept in memory until Vectorworks quits).
+- **Utility:**
+  - **Pause AI** refuses every new job until you turn it off; your AI is told to wait for you.
+  - **Save the drawing before AI changes it** saves each drawing once, before the first AI job on it since Vectorworks started. Untitled drawings and project files are skipped.
+  - **Save as script** keeps a Python job your AI ran: it goes into a *vw-mcp Scripts* script palette in the drawing's Resource Manager, where a double-click runs it again. Saved scripts run as ordinary Vectorworks scripts, without vw-mcp's safety checks. Plug-in objects they create or change can keep their old 2D look: run **Tools › Utilities › Reset All Plug-Ins** afterwards.
+  - **Copy diagnostics** copies versions, status and recent errors for a bug report.
 
 ## Troubleshooting
 
@@ -63,6 +76,7 @@ A refused call returns an error with `{refused, function, class, reason, alterna
 | The MCP server won't start in Cursor, VS Code or another app | The app can't find Node (common when Node is installed with nvm). Replace `"npx"` with the full path that `which npx` prints in Terminal. |
 | No **Help › vw-mcp Status…** item | The plug-in isn't loaded: same fix as above. |
 | Status says "Bridge not running" | Ports 47823–47830 are all in use. Quit whatever uses them and restart Vectorworks. |
+| "AI jobs are paused in Vectorworks" | Turn off **Pause AI** on the palette's Utility tab. |
 | "Vectorworks is busy (a dialog is open)" | Close the open dialog in Vectorworks, then retry. |
 | "No document is open" | Open or create a drawing. |
 | A version warning in `vw_bridge_status` | The plug-in and the relay come from different releases. Install both from the same release. |

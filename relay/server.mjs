@@ -292,6 +292,7 @@ function buildMcpServer() {
         engine: info?.engine ?? null,
         documentOpen: info?.documentOpen ?? null,
         busy: info?.busy ?? null,
+        paused: info?.paused ?? null,
         sweepMode: info?.sweepMode ?? null,
         guardVersion: info?.guardVersion ?? null,
         plugin: info ? { version: info.pluginVersion, port: info.port, pid: info.pid } : null,

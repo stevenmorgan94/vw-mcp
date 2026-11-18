@@ -28,6 +28,7 @@
 #include <map>
 #include <mutex>
 #include <random>
+#include <set>
 #include <thread>
 
 #if GS_MAC
@@ -50,6 +51,8 @@ namespace Bridge
     static const double kBusyTimeoutSec  = 10.0;   // a job blocked this long by a dialog is refused (spec §3)
     static const int    kMaxWaitSec      = 25;
     static const size_t kActivityMax     = 50;
+    static const size_t kCodeMax         = 20;          // jobs whose code is kept, in memory only (#27)
+    static const size_t kCodeMaxBytes    = 1 << 20;     // longer code isn't kept
 
     enum class JobState { Queued, Running, Done };
     struct Job
@@ -59,7 +62,11 @@ namespace Bridge
         JobState       state = JobState::Queued;
         nlohmann::json result;
         Clock::time_point submitted = Clock::now();
+        std::string    internal;          // "saveScript": queued by the palette, never by HTTP
+        std::string    internalName;
     };
+
+    struct CodeRecord { int id; std::string at, client, lang, code; bool ok; };
 
     static std::mutex                   gMu;
     static std::condition_variable      gCv;
@@ -67,6 +74,11 @@ namespace Bridge
     static int                          gNextJobId = 1;
     static std::deque<nlohmann::json>   gActivity;                  // newest first
     static std::map<std::string, std::string> gClients;             // name -> last seen (ISO)
+    static std::deque<CodeRecord>       gCodes;                     // newest first, kCodeMax
+
+    static std::atomic<bool>            gPaused { false };          // refuse new jobs (#27)
+    static std::atomic<bool>            gSaveFirst { false };       // save the drawing before its first job (#27)
+    static std::set<std::string>        gSavedDocs;                 // main thread only
 
     static std::atomic<bool>            gBusy { false };
     static std::atomic<bool>            gDocOpen { false };
@@ -116,6 +128,7 @@ namespace Bridge
         if (r.contains("guard") && r["guard"].contains("calls")) a["calls"] = r["guard"]["calls"];
         if (r.contains("guard") && r["guard"].contains("timeout")) a["timeout"] = true;
         if (r.contains("autoReset")) a["autoReset"] = r["autoReset"];
+        if (r.contains("savedFirst")) a["savedFirst"] = r["savedFirst"];
         std::string err = r.value("error", "");
         if (!err.empty()) a["error"] = err.substr(0, 200);
         gActivity.push_front(a);
@@ -127,8 +140,35 @@ namespace Bridge
     {
         j.result = std::move(result);
         j.state = JobState::Done;
+        if (!j.internal.empty()) return;    // the palette collects it (TakeInternalResult)
         RecordActivity(id, j, AgeSec(j) * 1000.0);
+        if (j.req.code.size() <= kCodeMaxBytes)
+        {
+            gCodes.push_front({ id, NowIso(), j.client, j.req.lang, j.req.code, j.result.value("ok", false) });
+            if (gCodes.size() > kCodeMax) gCodes.pop_back();
+        }
         gCv.notify_all();
+    }
+
+    // ---- settings (Plug-ins/Data/vw-mcp/settings.json) ----------------------------------
+    static std::filesystem::path SettingsPath() { return std::filesystem::path(DataFolder()) / "settings.json"; }
+
+    static void LoadSettings()
+    {
+        if (DataFolder().empty()) return;
+        std::ifstream in(SettingsPath());
+        if (!in) return;
+        nlohmann::json s = nlohmann::json::parse(in, nullptr, false);
+        if (!s.is_object()) return;
+        gPaused = s.value("paused", false);
+        gSaveFirst = s.value("saveFirst", false);
+    }
+
+    static void SaveSettings()
+    {
+        if (DataFolder().empty()) return;
+        std::ofstream out(SettingsPath(), std::ios::trunc);
+        if (out) out << nlohmann::json { { "paused", gPaused.load() }, { "saveFirst", gSaveFirst.load() } }.dump(2);
     }
 
     // ---- main thread ------------------------------------------------------------------
@@ -162,6 +202,7 @@ namespace Bridge
 
         int id = 0;
         JobRequest req;
+        std::string internal, internalName;
         {
             std::lock_guard<std::mutex> lk(gMu);
             for (auto& [jid, j] : gJobs)
@@ -175,14 +216,27 @@ namespace Bridge
                 }
                 id = jid;
                 req = j.req;
+                internal = j.internal;
+                internalName = j.internalName;
                 j.state = JobState::Running;
                 break;
             }
         }
         if (!id) return;
 
-        nlohmann::json result;
-        try { result = RunJob(req); }
+        nlohmann::json result, savedFirst;
+        try
+        {
+            if (internal == "saveScript")
+                result = SaveScriptResource(internalName, req.code);
+            else
+            {
+                if (gSaveFirst && gDocOpen)
+                    savedFirst = SaveActiveDocumentFirst(gSavedDocs);
+                result = RunJob(req);
+                if (!savedFirst.is_null()) result["savedFirst"] = savedFirst;
+            }
+        }
         catch (const std::exception& e) { result = { { "ok", false }, { "error", std::string("bridge exception: ") + e.what() } }; }
         catch (...) { result = { { "ok", false }, { "error", "bridge exception" } }; }
 
@@ -226,14 +280,50 @@ namespace Bridge
             { "port", gPort.load() }, { "pid", (int)getpid() },
             { "helpMenuItem", HelpMenuItemResult() },
             { "tableBuild", TableBuild() }, { "tableFunctions", TableFunctions() },
+            { "paused", gPaused.load() }, { "saveFirst", gSaveFirst.load() },
         };
         std::lock_guard<std::mutex> lk(gMu);
         nlohmann::json clients = nlohmann::json::array();
         for (auto& [name, seen] : gClients) clients.push_back({ { "name", name }, { "lastSeen", seen } });
         s["clients"] = clients;
-        s["activity"] = nlohmann::json(gActivity);
+        std::set<int> withCode;
+        nlohmann::json scripts = nlohmann::json::array();
+        for (auto& c : gCodes)
+        {
+            withCode.insert(c.id);
+            if (c.lang != "python" || !c.ok || scripts.size() >= 10) continue;
+            // title: the first comment line; preview: the first line that does something
+            std::string title, preview;
+            int lines = 0;
+            size_t pos = 0;
+            while (pos <= c.code.size())
+            {
+                size_t e = c.code.find('\n', pos);
+                std::string ln = c.code.substr(pos, e == std::string::npos ? std::string::npos : e - pos);
+                pos = e == std::string::npos ? c.code.size() + 1 : e + 1;
+                size_t b = ln.find_first_not_of(" \t\r");
+                if (b == std::string::npos) continue;
+                ++lines;
+                ln = ln.substr(b);
+                while (!ln.empty() && (ln.back() == '\r' || ln.back() == ' ')) ln.pop_back();
+                if (ln[0] == '#')
+                {
+                    if (title.empty()) { size_t t = ln.find_first_not_of("# "); if (t != std::string::npos) title = ln.substr(t, 80); }
+                }
+                else if (preview.empty() && ln.rfind("import ", 0) != 0 && ln.rfind("from ", 0) != 0)
+                    preview = ln.substr(0, 120);
+            }
+            scripts.push_back({ { "jobId", c.id }, { "at", c.at }, { "client", c.client }, { "title", title },
+                                { "preview", preview }, { "lines", lines } });
+        }
+        nlohmann::json activity = nlohmann::json(gActivity);
+        for (auto& a : activity)
+            if (withCode.count(a.value("jobId", 0))) a["hasCode"] = true;
+        s["activity"] = activity;
+        s["scripts"] = scripts;
+        s["scriptPalette"] = "vw-mcp Scripts";
         int queued = 0;
-        for (auto& [id, j] : gJobs) if (j.state != JobState::Done) ++queued;
+        for (auto& [id, j] : gJobs) if (j.state != JobState::Done && j.internal.empty()) ++queued;
         s["queued"] = queued;
         return s;
     }
@@ -244,6 +334,9 @@ namespace Bridge
         if (a.is_discarded() || !a.is_object() || !a.contains("code") || !a["code"].is_string())
             return SendJson(res, { { "ok", false }, { "error", "Expected { code: string, lang?: 'python'|'ops', ... }" } }, 400);
 
+        if (gPaused)
+            return SendJson(res, Refusal("paused", "AI jobs are paused in Vectorworks (vw-mcp palette, Utility tab).",
+                                         "Tell the user and wait: only they can turn AI jobs back on. Don't retry until they do."));
         Job j;
         j.req.code = a["code"].get<std::string>();
         j.req.lang = a.value("lang", std::string("python"));
@@ -280,7 +373,7 @@ namespace Bridge
         for (;;)
         {
             auto it = gJobs.find(id);
-            if (it == gJobs.end())
+            if (it == gJobs.end() || !it->second.internal.empty())
                 return SendJson(res, { { "ok", false }, { "error", "Unknown jobId (already retrieved or never created)" }, { "jobId", id } }, 404);
             Job& j = it->second;
             // While a modal loop runs, the pump timer doesn't fire: time the job out from here.
@@ -392,11 +485,77 @@ namespace Bridge
         svr.listen_after_bind();
     }
 
+    // ---- palette Utility tab (#27) --------------------------------------------------------
+    nlohmann::json JobCode(int id)
+    {
+        std::lock_guard<std::mutex> lk(gMu);
+        for (auto& c : gCodes)
+            if (c.id == id)
+                return { { "ok", true }, { "jobId", c.id }, { "lang", c.lang }, { "client", c.client }, { "at", c.at },
+                         { "jobOk", c.ok }, { "code", c.code } };
+        return { { "ok", false }, { "error", "That job's code is no longer kept (only the last 20 jobs)." } };
+    }
+
+    void SetPaused(bool on)    { gPaused = on; SaveSettings(); Log(on ? "bridge: AI jobs paused" : "bridge: AI jobs resumed"); }
+    void SetSaveFirst(bool on) { gSaveFirst = on; if (on) gSavedDocs.clear(); SaveSettings(); }
+
+    nlohmann::json QueueSaveScript(int jobId, const std::string& name)
+    {
+        std::string n = name;
+        for (auto& ch : n) if (ch == '\n' || ch == '\r' || ch == '\t') ch = ' ';
+        while (!n.empty() && n.back() == ' ') n.pop_back();
+        while (!n.empty() && n.front() == ' ') n.erase(0, 1);
+        if (n.empty()) return { { "ok", false }, { "error", "Enter a name." } };
+        if (n.size() > 63) return { { "ok", false }, { "error", "Names can be at most 63 characters." } };
+        Job j;
+        {
+            std::lock_guard<std::mutex> lk(gMu);
+            const CodeRecord* rec = nullptr;
+            for (auto& c : gCodes) if (c.id == jobId) rec = &c;
+            if (!rec) return { { "ok", false }, { "error", "That job's code is no longer kept (only the last 20 jobs)." } };
+            if (rec->lang != "python") return { { "ok", false }, { "error", "Only Python jobs can be saved as scripts." } };
+            char date[16];
+            std::time_t now = std::time(nullptr);
+            std::strftime(date, sizeof(date), "%Y-%m-%d", std::localtime(&now));
+            // Don't repeat the name if the code already starts with it as a comment.
+            std::string body = rec->code;
+            if (body.rfind("# " + n + "\n", 0) == 0) body.erase(0, n.size() + 3);
+            j.req.code = "# " + n + "\n"
+                         "# Saved from vw-mcp on " + std::string(date) + " (job " + std::to_string(jobId) + (rec->client.empty() ? "" : ", " + rec->client) + ").\n"
+                         "# Runs as an ordinary Vectorworks script, without vw-mcp's safety checks.\n"
+                         "# Plug-in objects it creates or changes may keep their old 2D look: afterwards run\n"
+                         "# Tools > Utilities > Reset All Plug-Ins (a reset inside this script has no effect).\n"
+                         "import vs\n\n" + body;
+            if (j.req.code.back() != '\n') j.req.code += '\n';
+            j.req.lang = "python";
+            j.internal = "saveScript";
+            j.internalName = n;
+            int id = gNextJobId++;
+            gJobs.emplace(id, std::move(j));
+#if GS_MAC
+            CFRunLoopWakeUp(CFRunLoopGetMain());
+#endif
+            return { { "ok", true }, { "ticket", id } };
+        }
+    }
+
+    nlohmann::json TakeInternalResult(int ticket)
+    {
+        std::lock_guard<std::mutex> lk(gMu);
+        auto it = gJobs.find(ticket);
+        if (it == gJobs.end() || it->second.internal.empty()) return { { "ok", false }, { "error", "Unknown ticket" } };
+        if (it->second.state != JobState::Done) return { { "pending", true } };
+        nlohmann::json r = std::move(it->second.result);
+        gJobs.erase(it);
+        return r;
+    }
+
     void Start()
     {
         if (gStarted) return;
         gStarted = true;
         InitHostInfo();
+        LoadSettings();
         gToken = RandomToken();
         gSweep = SweepMode();
 #if GS_MAC
